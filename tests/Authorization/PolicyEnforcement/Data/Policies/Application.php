@@ -33,7 +33,7 @@ abstract class Application
     /**
      * @return PolicySetInterface
      */
-    public static function getApplicationPolicy()
+    public static function getApplicationPolicy(): PolicySetInterface
     {
         return (new PolicySet([
 
@@ -46,9 +46,9 @@ abstract class Application
     /**
      * @return PolicySetInterface
      */
-    public static function getApplicationPolicyThatCouldBeOptimizedAsSwitch()
+    public static function getApplicationPolicyThatCouldBeOptimizedAsSwitch(): PolicySetInterface
     {
-        $postPolicies     = Posts::getPolicies();
+        $postPolicies = Posts::getPolicies();
         $commentsPolicies = Comments::getPolicies();
 
         // all post rules have targets that could be combined and replaced with switch
@@ -64,7 +64,7 @@ abstract class Application
             count($allOfs[0]->getPairs()) === 1
         );
 
-        // thus we can check how optimization algorithm works with targets for Rules and Policies.
+        // thus, we can check how optimization algorithm works with targets for Rules and Policies.
 
         return (new PolicySet([
 

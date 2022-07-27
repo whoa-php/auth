@@ -24,6 +24,7 @@ namespace Whoa\Auth\Authorization\PolicyDecision\Algorithms;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\EvaluationEnum;
 use Whoa\Auth\Contracts\Authorization\PolicyInformation\ContextInterface;
 use Psr\Log\LoggerInterface;
+
 use function array_key_exists;
 use function array_merge;
 use function call_user_func;
@@ -34,24 +35,23 @@ use function call_user_func;
 abstract class BaseAlgorithm implements BaseAlgorithmInterface
 {
     /** @var callable */
-    const METHOD = null;
+    public const METHOD = null;
 
     /** Evaluation result index */
-    const EVALUATION_VALUE = 0;
+    public const EVALUATION_VALUE = 0;
 
     /** Evaluation result index */
-    const EVALUATION_OBLIGATIONS = self::EVALUATION_VALUE + 1;
+    public const EVALUATION_OBLIGATIONS = self::EVALUATION_VALUE + 1;
 
     /** Evaluation result index */
-    const EVALUATION_ADVICE = self::EVALUATION_OBLIGATIONS + 1;
+    public const EVALUATION_ADVICE = self::EVALUATION_OBLIGATIONS + 1;
 
     /**
-     * @param callable             $method
-     * @param ContextInterface     $context
-     * @param array                $optimizedTargets
-     * @param array                $encodedItems
+     * @param callable $method
+     * @param ContextInterface $context
+     * @param array $optimizedTargets
+     * @param array $encodedItems
      * @param LoggerInterface|null $logger
-     *
      * @return array
      */
     protected static function callAlgorithm(
@@ -60,15 +60,13 @@ abstract class BaseAlgorithm implements BaseAlgorithmInterface
         array $optimizedTargets,
         array $encodedItems,
         LoggerInterface $logger = null
-    ): array
-    {
+    ): array {
         return call_user_func($method, $context, $optimizedTargets, $encodedItems, $logger);
     }
 
     /**
      * @param ContextInterface $context
-     * @param array|null       $serializedLogical
-     *
+     * @param array|null $serializedLogical
      * @return bool
      */
     protected static function evaluateLogical(ContextInterface $context, array $serializedLogical = null): bool
@@ -78,30 +76,26 @@ abstract class BaseAlgorithm implements BaseAlgorithmInterface
         }
 
         $evaluation = call_user_func($serializedLogical, $context);
-        $result     = $evaluation === true;
-
-        return $result;
+        return $evaluation === true;
     }
 
     /**
-     * @param int   $evaluation
+     * @param int $evaluation
      * @param array $obligations
      * @param array $advice
-     *
      * @return array
      */
     protected static function packEvaluationResult(int $evaluation, array $obligations = [], array $advice = []): array
     {
         return [
-            self::EVALUATION_VALUE       => $evaluation,
+            self::EVALUATION_VALUE => $evaluation,
             self::EVALUATION_OBLIGATIONS => $obligations,
-            self::EVALUATION_ADVICE      => $advice,
+            self::EVALUATION_ADVICE => $advice,
         ];
     }
 
     /**
      * @param array $packedEvaluation
-     *
      * @return int
      */
     protected static function unpackEvaluationValue(array $packedEvaluation): int
@@ -111,7 +105,6 @@ abstract class BaseAlgorithm implements BaseAlgorithmInterface
 
     /**
      * @param array $packedEvaluation
-     *
      * @return array
      */
     protected static function unpackEvaluationObligations(array $packedEvaluation): array
@@ -121,7 +114,6 @@ abstract class BaseAlgorithm implements BaseAlgorithmInterface
 
     /**
      * @param array $packedEvaluation
-     *
      * @return array
      */
     protected static function unpackEvaluationAdvice(array $packedEvaluation): array
@@ -130,11 +122,10 @@ abstract class BaseAlgorithm implements BaseAlgorithmInterface
     }
 
     /**
-     * @param ContextInterface     $context
-     * @param array                $optimizedTargets
-     * @param array                $encodedItems
+     * @param ContextInterface $context
+     * @param array $optimizedTargets
+     * @param array $encodedItems
      * @param LoggerInterface|null $logger
-     *
      * @return array
      */
     protected static function evaluateFirstApplicable(
@@ -142,15 +133,14 @@ abstract class BaseAlgorithm implements BaseAlgorithmInterface
         array $optimizedTargets,
         array $encodedItems,
         ?LoggerInterface $logger
-    ): array
-    {
+    ): array {
         foreach (static::evaluateTargets($context, $optimizedTargets, $logger) as $match => $itemId) {
-            $encodedItem      = $encodedItems[$itemId];
+            $encodedItem = $encodedItems[$itemId];
             $packedEvaluation = static::evaluateItem($context, $match, $encodedItem, $logger);
-            $evaluation       = static::unpackEvaluationValue($packedEvaluation);
+            $evaluation = static::unpackEvaluationValue($packedEvaluation);
             if ($evaluation === EvaluationEnum::PERMIT || $evaluation === EvaluationEnum::DENY) {
                 $obligations = static::unpackEvaluationObligations($packedEvaluation);
-                $advice      = static::unpackEvaluationAdvice($packedEvaluation);
+                $advice = static::unpackEvaluationAdvice($packedEvaluation);
 
                 return static::packEvaluationResult($evaluation, $obligations, $advice);
             }
@@ -160,11 +150,10 @@ abstract class BaseAlgorithm implements BaseAlgorithmInterface
     }
 
     /**
-     * @param ContextInterface     $context
-     * @param array                $optimizedTargets
-     * @param array                $encodedItems
+     * @param ContextInterface $context
+     * @param array $optimizedTargets
+     * @param array $encodedItems
      * @param LoggerInterface|null $logger
-     *
      * @return array
      */
     protected static function evaluateDenyUnlessPermit(
@@ -172,15 +161,14 @@ abstract class BaseAlgorithm implements BaseAlgorithmInterface
         array $optimizedTargets,
         array $encodedItems,
         ?LoggerInterface $logger
-    ): array
-    {
+    ): array {
         foreach (static::evaluateTargets($context, $optimizedTargets, $logger) as $match => $itemId) {
-            $encodedItem      = $encodedItems[$itemId];
+            $encodedItem = $encodedItems[$itemId];
             $packedEvaluation = static::evaluateItem($context, $match, $encodedItem, $logger);
-            $evaluation       = static::unpackEvaluationValue($packedEvaluation);
+            $evaluation = static::unpackEvaluationValue($packedEvaluation);
             if ($evaluation === EvaluationEnum::PERMIT) {
                 $obligations = static::unpackEvaluationObligations($packedEvaluation);
-                $advice      = static::unpackEvaluationAdvice($packedEvaluation);
+                $advice = static::unpackEvaluationAdvice($packedEvaluation);
 
                 return static::packEvaluationResult($evaluation, $obligations, $advice);
             }
@@ -190,11 +178,10 @@ abstract class BaseAlgorithm implements BaseAlgorithmInterface
     }
 
     /**
-     * @param ContextInterface     $context
-     * @param array                $optimizedTargets
-     * @param array                $encodedItems
+     * @param ContextInterface $context
+     * @param array $optimizedTargets
+     * @param array $encodedItems
      * @param LoggerInterface|null $logger
-     *
      * @return array
      */
     protected static function evaluatePermitUnlessDeny(
@@ -202,15 +189,14 @@ abstract class BaseAlgorithm implements BaseAlgorithmInterface
         array $optimizedTargets,
         array $encodedItems,
         ?LoggerInterface $logger
-    ): array
-    {
+    ): array {
         foreach (static::evaluateTargets($context, $optimizedTargets, $logger) as $match => $itemId) {
-            $encodedItem      = $encodedItems[$itemId];
+            $encodedItem = $encodedItems[$itemId];
             $packedEvaluation = static::evaluateItem($context, $match, $encodedItem, $logger);
-            $evaluation       = static::unpackEvaluationValue($packedEvaluation);
+            $evaluation = static::unpackEvaluationValue($packedEvaluation);
             if ($evaluation === EvaluationEnum::DENY) {
                 $obligations = static::unpackEvaluationObligations($packedEvaluation);
-                $advice      = static::unpackEvaluationAdvice($packedEvaluation);
+                $advice = static::unpackEvaluationAdvice($packedEvaluation);
 
                 return static::packEvaluationResult($evaluation, $obligations, $advice);
             }
@@ -220,37 +206,31 @@ abstract class BaseAlgorithm implements BaseAlgorithmInterface
     }
 
     /**
-     * @param ContextInterface     $context
-     * @param array                $optimizedTargets
-     * @param array                $encodedItems
+     * @param ContextInterface $context
+     * @param array $optimizedTargets
+     * @param array $encodedItems
      * @param LoggerInterface|null $logger
-     *
      * @return array
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
-     * @SuppressWarnings(PHPMD.ElseExpression)
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     protected static function evaluateDenyOverrides(
         ContextInterface $context,
         array $optimizedTargets,
         array $encodedItems,
         ?LoggerInterface $logger
-    ): array
-    {
-        $foundDeny          = false;
-        $foundPermit        = false;
-        $foundIntDeny       = false;
-        $foundIntPermit     = false;
+    ): array {
+        $foundDeny = false;
+        $foundPermit = false;
+        $foundIntDeny = false;
+        $foundIntPermit = false;
         $foundIntDenyPermit = false;
 
         $obligationsCollector = [];
-        $adviceCollector      = [];
+        $adviceCollector = [];
 
         foreach (static::evaluateTargets($context, $optimizedTargets, $logger) as $match => $itemId) {
-            $encodedItem      = $encodedItems[$itemId];
+            $encodedItem = $encodedItems[$itemId];
             $packedEvaluation = static::evaluateItem($context, $match, $encodedItem, $logger);
-            $evaluation       = static::unpackEvaluationValue($packedEvaluation);
+            $evaluation = static::unpackEvaluationValue($packedEvaluation);
             switch ($evaluation) {
                 case EvaluationEnum::DENY:
                     $foundDeny = true;
@@ -270,10 +250,10 @@ abstract class BaseAlgorithm implements BaseAlgorithmInterface
             }
 
             $itemObligations = static::unpackEvaluationObligations($packedEvaluation);
-            $itemAdvice      = static::unpackEvaluationAdvice($packedEvaluation);
+            $itemAdvice = static::unpackEvaluationAdvice($packedEvaluation);
 
             $obligationsCollector = static::mergeToStorage($obligationsCollector, $evaluation, $itemObligations);
-            $adviceCollector      = static::mergeToStorage($adviceCollector, $evaluation, $itemAdvice);
+            $adviceCollector = static::mergeToStorage($adviceCollector, $evaluation, $itemAdvice);
         }
 
         if ($foundDeny === true) {
@@ -293,43 +273,37 @@ abstract class BaseAlgorithm implements BaseAlgorithmInterface
         }
 
         $obligations = Encoder::getFulfillObligations($evaluation, $obligationsCollector);
-        $advice      = Encoder::getAppliedAdvice($evaluation, $adviceCollector);
+        $advice = Encoder::getAppliedAdvice($evaluation, $adviceCollector);
 
         return static::packEvaluationResult($evaluation, $obligations, $advice);
     }
 
     /**
-     * @param ContextInterface     $context
-     * @param array                $optimizedTargets
-     * @param array                $encodedItems
+     * @param ContextInterface $context
+     * @param array $optimizedTargets
+     * @param array $encodedItems
      * @param LoggerInterface|null $logger
-     *
      * @return array
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
-     * @SuppressWarnings(PHPMD.ElseExpression)
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     protected static function evaluatePermitOverrides(
         ContextInterface $context,
         array $optimizedTargets,
         array $encodedItems,
         ?LoggerInterface $logger
-    ): array
-    {
-        $foundDeny          = false;
-        $foundPermit        = false;
-        $foundIntDeny       = false;
-        $foundIntPermit     = false;
+    ): array {
+        $foundDeny = false;
+        $foundPermit = false;
+        $foundIntDeny = false;
+        $foundIntPermit = false;
         $foundIntDenyPermit = false;
 
         $obligationsCollector = [];
-        $adviceCollector      = [];
+        $adviceCollector = [];
 
         foreach (static::evaluateTargets($context, $optimizedTargets, $logger) as $match => $itemId) {
-            $encodedItem      = $encodedItems[$itemId];
+            $encodedItem = $encodedItems[$itemId];
             $packedEvaluation = static::evaluateItem($context, $match, $encodedItem, $logger);
-            $evaluation       = static::unpackEvaluationValue($packedEvaluation);
+            $evaluation = static::unpackEvaluationValue($packedEvaluation);
             switch ($evaluation) {
                 case EvaluationEnum::DENY:
                     $foundDeny = true;
@@ -349,10 +323,10 @@ abstract class BaseAlgorithm implements BaseAlgorithmInterface
             }
 
             $itemObligations = static::unpackEvaluationObligations($packedEvaluation);
-            $itemAdvice      = static::unpackEvaluationAdvice($packedEvaluation);
+            $itemAdvice = static::unpackEvaluationAdvice($packedEvaluation);
 
             $obligationsCollector = static::mergeToStorage($obligationsCollector, $evaluation, $itemObligations);
-            $adviceCollector      = static::mergeToStorage($adviceCollector, $evaluation, $itemAdvice);
+            $adviceCollector = static::mergeToStorage($adviceCollector, $evaluation, $itemAdvice);
         }
 
         if ($foundPermit === true) {
@@ -372,16 +346,15 @@ abstract class BaseAlgorithm implements BaseAlgorithmInterface
         }
 
         $obligations = Encoder::getFulfillObligations($evaluation, $obligationsCollector);
-        $advice      = Encoder::getAppliedAdvice($evaluation, $adviceCollector);
+        $advice = Encoder::getAppliedAdvice($evaluation, $adviceCollector);
 
         return static::packEvaluationResult($evaluation, $obligations, $advice);
     }
 
     /**
-     * @param array      $storage
+     * @param array $storage
      * @param string|int $key
-     * @param array      $list
-     *
+     * @param array $list
      * @return array
      */
     private static function mergeToStorage(array $storage, $key, array $list): array

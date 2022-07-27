@@ -32,12 +32,12 @@ class RulesPermitUnlessDeny extends BaseRuleAlgorithm
     use DefaultTargetSerializeTrait;
 
     /** @inheritdoc */
-    const METHOD = [self::class, 'evaluate'];
+    public const METHOD = [self::class, 'evaluate'];
 
     /**
-     * @param ContextInterface     $context
-     * @param array                $optimizedTargets
-     * @param array                $encodedRules
+     * @param ContextInterface $context
+     * @param array $optimizedTargets
+     * @param array $encodedRules
      * @param LoggerInterface|null $logger
      *
      * @return array
@@ -47,8 +47,7 @@ class RulesPermitUnlessDeny extends BaseRuleAlgorithm
         array $optimizedTargets,
         array $encodedRules,
         ?LoggerInterface $logger
-    ): array
-    {
+    ): array {
         return self::evaluatePermitUnlessDeny($context, $optimizedTargets, $encodedRules, $logger);
     }
 }

@@ -32,14 +32,13 @@ class PoliciesOrSetsDenyOverrides extends BasePolicyOrSetAlgorithm
     use DefaultTargetSerializeTrait;
 
     /** @inheritdoc */
-    const METHOD = [self::class, 'evaluate'];
+    public const METHOD = [self::class, 'evaluate'];
 
     /**
-     * @param ContextInterface     $context
-     * @param array                $optimizedTargets
-     * @param array                $encPoliciesOrSets
+     * @param ContextInterface $context
+     * @param array $optimizedTargets
+     * @param array $encPoliciesOrSets
      * @param LoggerInterface|null $logger
-     *
      * @return array
      */
     public static function evaluate(
@@ -47,8 +46,7 @@ class PoliciesOrSetsDenyOverrides extends BasePolicyOrSetAlgorithm
         array $optimizedTargets,
         array $encPoliciesOrSets,
         ?LoggerInterface $logger
-    ): array
-    {
+    ): array {
         return static::evaluateDenyOverrides($context, $optimizedTargets, $encPoliciesOrSets, $logger);
     }
 }

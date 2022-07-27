@@ -27,20 +27,20 @@ namespace Whoa\Tests\Auth\Authorization\PolicyEnforcement\Data;
 interface RequestProperties
 {
     /** Request key */
-    const REQUEST_OPERATION = 0;
+    public const REQUEST_OPERATION = 0;
 
     /** Request key */
-    const REQUEST_RESOURCE_TYPE = self::REQUEST_OPERATION + 1;
+    public const REQUEST_RESOURCE_TYPE = self::REQUEST_OPERATION + 1;
 
     /** Request key */
-    const REQUEST_RESOURCE_IDENTITY = self::REQUEST_RESOURCE_TYPE + 1;
+    public const REQUEST_RESOURCE_IDENTITY = self::REQUEST_RESOURCE_TYPE + 1;
 
     /** Request key */
-    const REQUEST_RESOURCE_ATTRIBUTES = self::REQUEST_RESOURCE_IDENTITY + 1;
+    public const REQUEST_RESOURCE_ATTRIBUTES = self::REQUEST_RESOURCE_IDENTITY + 1;
 
     /** Request key */
-    const REQUEST_RESOURCE_RELATIONSHIPS = self::REQUEST_RESOURCE_ATTRIBUTES + 1;
+    public const REQUEST_RESOURCE_RELATIONSHIPS = self::REQUEST_RESOURCE_ATTRIBUTES + 1;
 
     /** Request key */
-    const REQUEST_LAST = self::REQUEST_RESOURCE_RELATIONSHIPS;
+    public const REQUEST_LAST = self::REQUEST_RESOURCE_RELATIONSHIPS;
 }

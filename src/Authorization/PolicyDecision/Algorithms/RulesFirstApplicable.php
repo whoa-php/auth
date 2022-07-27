@@ -32,14 +32,13 @@ class RulesFirstApplicable extends BaseRuleAlgorithm
     use DefaultTargetSerializeTrait;
 
     /** @inheritdoc */
-    const METHOD = [self::class, 'evaluate'];
+    public const METHOD = [self::class, 'evaluate'];
 
     /**
-     * @param ContextInterface     $context
-     * @param array                $optimizedTargets
-     * @param array                $encodedRules
+     * @param ContextInterface $context
+     * @param array $optimizedTargets
+     * @param array $encodedRules
      * @param LoggerInterface|null $logger
-     *
      * @return array
      */
     public static function evaluate(
@@ -47,8 +46,7 @@ class RulesFirstApplicable extends BaseRuleAlgorithm
         array $optimizedTargets,
         array $encodedRules,
         ?LoggerInterface $logger
-    ): array
-    {
+    ): array {
         return self::evaluateFirstApplicable($context, $optimizedTargets, $encodedRules, $logger);
     }
 }

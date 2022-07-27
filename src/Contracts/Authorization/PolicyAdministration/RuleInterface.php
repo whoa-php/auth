@@ -38,7 +38,6 @@ interface RuleInterface
 
     /**
      * Optional extra check if rule matches incoming request.
-     *
      * @return MethodInterface|null
      */
     public function getCondition(): ?MethodInterface;

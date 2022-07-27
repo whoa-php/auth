@@ -26,6 +26,7 @@ use Whoa\Auth\Contracts\Authorization\PolicyAdministration\MethodInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\ObligationInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\RuleInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\TargetInterface;
+
 use function assert;
 use function call_user_func;
 
@@ -37,40 +38,40 @@ class Rule implements RuleInterface
     /**
      * @var string|null
      */
-    private $name;
+    private ?string $name;
 
     /**
      * @var TargetInterface|null
      */
-    private $target;
+    private ?TargetInterface $target;
 
     /**
      * @var MethodInterface|null
      */
-    private $condition;
+    private ?MethodInterface $condition;
 
     /**
      * @var MethodInterface|null
      */
-    private $effect;
+    private ?MethodInterface $effect;
 
     /**
      * @var ObligationInterface[]
      */
-    private $obligations;
+    private array $obligations;
 
     /**
      * @var AdviceInterface[]
      */
-    private $advice;
+    private array $advice;
 
     /**
-     * @param null|string           $name
-     * @param TargetInterface|null  $target
-     * @param MethodInterface|null  $condition
-     * @param MethodInterface|null  $effect
+     * @param null|string $name
+     * @param TargetInterface|null $target
+     * @param MethodInterface|null $condition
+     * @param MethodInterface|null $effect
      * @param ObligationInterface[] $obligations
-     * @param AdviceInterface[]     $advice
+     * @param AdviceInterface[] $advice
      */
     public function __construct(
         string $name = null,
@@ -79,8 +80,7 @@ class Rule implements RuleInterface
         MethodInterface $effect = null,
         array $obligations = [],
         array $advice = []
-    )
-    {
+    ) {
         $this->setName($name)->setTarget($target)->setCondition($condition)->setEffect($effect)
             ->setObligations($obligations)->setAdvice($advice);
     }
@@ -95,7 +95,6 @@ class Rule implements RuleInterface
 
     /**
      * @param null|string $name
-     *
      * @return self
      */
     public function setName(?string $name): self
@@ -115,7 +114,6 @@ class Rule implements RuleInterface
 
     /**
      * @param TargetInterface|null $target
-     *
      * @return self
      */
     public function setTarget(?TargetInterface $target): self
@@ -135,7 +133,6 @@ class Rule implements RuleInterface
 
     /**
      * @param MethodInterface|null $condition
-     *
      * @return self
      */
     public function setCondition(?MethodInterface $condition): self
@@ -154,8 +151,7 @@ class Rule implements RuleInterface
     }
 
     /**
-     * @param MethodInterface $effect
-     *
+     * @param MethodInterface|null $effect
      * @return self
      */
     public function setEffect(?MethodInterface $effect): self
@@ -175,20 +171,21 @@ class Rule implements RuleInterface
 
     /**
      * @param ObligationInterface[] $obligations
-     *
      * @return self
      */
     public function setObligations(array $obligations): self
     {
         // check every item is Obligation (debug mode only)
-        assert(call_user_func(
+        assert(
+            call_user_func(
                 function () use ($obligations) {
                     foreach ($obligations as $item) {
                         assert($item instanceof ObligationInterface);
                     }
                     return true;
                 }
-            ) === true);
+            ) === true
+        );
 
         $this->obligations = $obligations;
 
@@ -205,20 +202,21 @@ class Rule implements RuleInterface
 
     /**
      * @param AdviceInterface[] $advice
-     *
      * @return self
      */
     public function setAdvice(array $advice): self
     {
         // check every item is Obligation (debug mode only)
-        assert(call_user_func(
+        assert(
+            call_user_func(
                 function () use ($advice) {
                     foreach ($advice as $item) {
                         assert($item instanceof AdviceInterface);
                     }
                     return true;
                 }
-            ) === true);
+            ) === true
+        );
 
         $this->advice = $advice;
 

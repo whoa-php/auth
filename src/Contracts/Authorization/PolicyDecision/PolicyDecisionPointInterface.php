@@ -30,7 +30,6 @@ interface PolicyDecisionPointInterface
 {
     /**
      * @param ContextInterface $context
-     *
      * @return array
      */
     public function evaluate(ContextInterface $context): array;

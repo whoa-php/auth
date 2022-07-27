@@ -33,11 +33,11 @@ class Context extends Container implements ContextInterface
     /**
      * @var RequestInterface
      */
-    private $request;
+    private RequestInterface $request;
 
     /**
      * @param RequestInterface $request
-     * @param array            $contextDefinitions
+     * @param array $contextDefinitions
      */
     public function __construct(RequestInterface $request, array $contextDefinitions = [])
     {

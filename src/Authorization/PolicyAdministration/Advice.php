@@ -23,6 +23,7 @@ namespace Whoa\Auth\Authorization\PolicyAdministration;
 
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\AdviceInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\EvaluationEnum;
+
 use function assert;
 
 /**
@@ -33,10 +34,10 @@ class Advice extends Method implements AdviceInterface
     /**
      * @var int
      */
-    private $appliesTo;
+    private int $appliesTo;
 
     /**
-     * @param int      $appliesTo
+     * @param int $appliesTo
      * @param callable $callable
      */
     public function __construct(int $appliesTo, callable $callable)

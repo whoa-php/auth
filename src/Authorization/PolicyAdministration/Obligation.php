@@ -23,6 +23,7 @@ namespace Whoa\Auth\Authorization\PolicyAdministration;
 
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\EvaluationEnum;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\ObligationInterface;
+
 use function assert;
 
 /**
@@ -33,10 +34,10 @@ class Obligation extends Method implements ObligationInterface
     /**
      * @var int
      */
-    private $fulfillOn;
+    private int $fulfillOn;
 
     /**
-     * @param int      $fulfillOn
+     * @param int $fulfillOn
      * @param callable $callable
      */
     public function __construct(int $fulfillOn, callable $callable)

@@ -39,16 +39,15 @@ class TestRuleAlgorithm extends BaseRuleAlgorithm
     use DefaultTargetSerializeTrait;
 
     /** @inheritdoc */
-    const METHOD = [self::class, 'evaluate'];
+    public const METHOD = [self::class, 'evaluate'];
 
-    public static $result = EvaluationEnum::NOT_APPLICABLE;
+    public static int $result = EvaluationEnum::NOT_APPLICABLE;
 
     /**
-     * @param ContextInterface     $context
-     * @param array                $optimizedTargets
-     * @param array                $encodedRules
+     * @param ContextInterface $context
+     * @param array $optimizedTargets
+     * @param array $encodedRules
      * @param LoggerInterface|null $logger
-     *
      * @return array
      */
     public static function evaluate(
@@ -56,8 +55,7 @@ class TestRuleAlgorithm extends BaseRuleAlgorithm
         array $optimizedTargets,
         array $encodedRules,
         LoggerInterface $logger = null
-    )
-    {
+    ): array {
         $context && $optimizedTargets && $encodedRules && $logger ?: null;
 
         return static::packEvaluationResult(static::$result);

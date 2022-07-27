@@ -21,6 +21,8 @@ declare(strict_types=1);
 
 namespace Whoa\Auth\Authorization\PolicyDecision;
 
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Whoa\Auth\Authorization\PolicyDecision\Algorithms\BasePolicyOrSetAlgorithm;
 use Whoa\Auth\Authorization\PolicyDecision\Algorithms\DefaultTargetSerializeTrait;
 use Whoa\Auth\Authorization\PolicyDecision\Algorithms\Encoder;
@@ -29,6 +31,7 @@ use Whoa\Auth\Contracts\Authorization\PolicyDecision\PolicyDecisionPointInterfac
 use Whoa\Auth\Contracts\Authorization\PolicyInformation\ContextInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
+
 use function assert;
 
 /**
@@ -36,12 +39,13 @@ use function assert;
  */
 class PolicyDecisionPoint implements PolicyDecisionPointInterface
 {
-    use DefaultTargetSerializeTrait, LoggerAwareTrait;
+    use DefaultTargetSerializeTrait;
+    use LoggerAwareTrait;
 
     /**
      * @var array
      */
-    private $encodePolicySet;
+    private array $encodePolicySet;
 
     /**
      * @param PolicySetInterface|array $data
@@ -53,10 +57,9 @@ class PolicyDecisionPoint implements PolicyDecisionPointInterface
 
     /**
      * @param ContextInterface $context
-     *
      * @return array
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function evaluate(ContextInterface $context): array
     {
@@ -68,7 +71,7 @@ class PolicyDecisionPoint implements PolicyDecisionPointInterface
         $logger === null ?: $logger->debug("Policy Decision Point evaluates '$name' policy set.");
 
         $target = Encoder::policySetTarget($set);
-        $match  = $this->evaluateTarget($context, $target, $logger);
+        $match = $this->evaluateTarget($context, $target, $logger);
         $result = BasePolicyOrSetAlgorithm::evaluateItem($context, $match, $this->getEncodePolicySet(), $logger);
 
         $logger === null ?: $logger->debug("Policy Decision Point evaluated '$name' policy set.");
@@ -94,8 +97,6 @@ class PolicyDecisionPoint implements PolicyDecisionPointInterface
 
     /**
      * @param PolicySetInterface $policySet
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     protected function initWithPolicySet(PolicySetInterface $policySet): void
     {
@@ -104,8 +105,6 @@ class PolicyDecisionPoint implements PolicyDecisionPointInterface
 
     /**
      * @param array $encodePolicySet
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     protected function initWithData(array $encodePolicySet): void
     {

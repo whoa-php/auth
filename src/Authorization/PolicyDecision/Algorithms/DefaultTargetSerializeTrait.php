@@ -22,11 +22,14 @@ declare(strict_types=1);
 namespace Whoa\Auth\Authorization\PolicyDecision\Algorithms;
 
 use Generator;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\TargetInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\TargetMatchEnum;
 use Whoa\Auth\Contracts\Authorization\PolicyInformation\ContextInterface;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
+
 use function assert;
 use function array_key_exists;
 use function count;
@@ -39,21 +42,18 @@ use function reset;
 trait DefaultTargetSerializeTrait
 {
     /**
-     * @param ContextInterface     $context
-     * @param array                $optimizedTargets
+     * @param ContextInterface $context
+     * @param array $optimizedTargets
      * @param LoggerInterface|null $logger
-     *
      * @return Generator
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
-     * @SuppressWarnings(PHPMD.ElseExpression)
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public static function evaluateTargets(
         ContextInterface $context,
         array $optimizedTargets,
         ?LoggerInterface $logger
-    ): Generator
-    {
+    ): Generator {
         [$isOptimizedForSwitch, $data] = $optimizedTargets;
         if ($isOptimizedForSwitch === true) {
             assert(count($data) === 2);
@@ -61,7 +61,7 @@ trait DefaultTargetSerializeTrait
             if ($context->has($contextKey) === true &&
                 array_key_exists($targetValue = $context->get($contextKey), $valueRuleIdMap) === true
             ) {
-                $matchFound    = true;
+                $matchFound = true;
                 $matchedRuleId = $valueRuleIdMap[$targetValue];
             } else {
                 $matchFound = false;
@@ -93,28 +93,24 @@ trait DefaultTargetSerializeTrait
     }
 
     /**
-     * @param ContextInterface     $context
-     * @param array                $target
+     * @param ContextInterface $context
+     * @param array $target
      * @param LoggerInterface|null $logger
-     *
      * @return int
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     protected static function evaluateTarget(
         ContextInterface $context,
         array $target,
         ?LoggerInterface $logger
-    ): int
-    {
+    ): int {
         /** @see http://docs.oasis-open.org/xacml/3.0/xacml-3.0-core-spec-os-en.html #7.11 (table 4) */
 
         assert(Encoder::isTarget($target) === true);
 
         $anyOfs = Encoder::targetAnyOfs($target);
-        $name   = $logger === null ? null : Encoder::targetName($target);
+        $name = $logger === null ? null : Encoder::targetName($target);
 
         if ($anyOfs === null) {
             $logger === null ?: $logger->debug("Target '$name' matches anything.");
@@ -150,10 +146,7 @@ trait DefaultTargetSerializeTrait
 
     /**
      * @param TargetInterface[] $targets
-     *
      * @return array
-     *
-     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     protected function optimizeTargets(array $targets): array
     {
@@ -162,7 +155,7 @@ trait DefaultTargetSerializeTrait
             assert(count($data) === 2); // context key and value => rule ID pairs.
         } else {
             $isOptimizedForSwitch = false;
-            $data                 = [];
+            $data = [];
             foreach ($targets as $ruleId => $target) {
                 $data[$ruleId] = $this->encodeTarget($target);
             }
@@ -173,12 +166,11 @@ trait DefaultTargetSerializeTrait
 
     /**
      * @param TargetInterface|null $target
-     *
      * @return array
      */
     protected static function encodeTarget(?TargetInterface $target): array
     {
-        $name   = null;
+        $name = null;
         $anyOfs = null;
 
         if ($target !== null) {
@@ -189,25 +181,21 @@ trait DefaultTargetSerializeTrait
         }
 
         return [
-            Encoder::TYPE           => Encoder::TYPE_TARGET,
-            Encoder::TARGET_NAME    => $name,
+            Encoder::TYPE => Encoder::TYPE_TARGET,
+            Encoder::TARGET_NAME => $name,
             Encoder::TARGET_ANY_OFS => $anyOfs,
         ];
     }
 
     /**
      * @param TargetInterface[] $targets
-     *
      * @return array|null
-     *
-     * @SuppressWarnings(PHPMD.ElseExpression)
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     private function tryToEncodeTargetsAsSwitch(array $targets): ?array
     {
         $result = count($targets) > 1;
 
-        $contextKey     = null;
+        $contextKey = null;
         $valueRuleIdMap = [];
 
         foreach ($targets as $ruleId => $nullableTarget) {
@@ -217,7 +205,7 @@ trait DefaultTargetSerializeTrait
                 count($pairs = reset($allOfs)->getPairs()) === 1
             ) {
                 $value = reset($pairs);
-                $key   = key($pairs);
+                $key = key($pairs);
                 assert($key !== null);
                 if ($contextKey === null) {
                     $contextKey = $key;

@@ -27,17 +27,17 @@ namespace Whoa\Tests\Auth\Authorization\PolicyEnforcement\Data;
 interface ContextProperties extends RequestProperties
 {
     /** Context key */
-    const CONTEXT_CURRENT_USER_ID = self::REQUEST_LAST + 1;
+    public const CONTEXT_CURRENT_USER_ID = self::REQUEST_LAST + 1;
 
     /** Context key */
-    const CONTEXT_CURRENT_USER_ROLE = self::CONTEXT_CURRENT_USER_ID + 1;
+    public const CONTEXT_CURRENT_USER_ROLE = self::CONTEXT_CURRENT_USER_ID + 1;
 
     /** Context key */
-    const CONTEXT_IS_WORK_TIME = self::CONTEXT_CURRENT_USER_ROLE + 1;
+    public const CONTEXT_IS_WORK_TIME = self::CONTEXT_CURRENT_USER_ROLE + 1;
 
     /** Context key */
-    const CONTEXT_USER_IS_SIGNED_IN = self::CONTEXT_IS_WORK_TIME + 1;
+    public const CONTEXT_USER_IS_SIGNED_IN = self::CONTEXT_IS_WORK_TIME + 1;
 
     /** Context key */
-    const CONTEXT_LAST = self::CONTEXT_USER_IS_SIGNED_IN;
+    public const CONTEXT_LAST = self::CONTEXT_USER_IS_SIGNED_IN;
 }

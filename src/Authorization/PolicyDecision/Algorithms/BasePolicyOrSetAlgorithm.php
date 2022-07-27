@@ -28,6 +28,7 @@ use Whoa\Auth\Contracts\Authorization\PolicyAdministration\PolicySetInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\TargetMatchEnum;
 use Whoa\Auth\Contracts\Authorization\PolicyInformation\ContextInterface;
 use Psr\Log\LoggerInterface;
+
 use function assert;
 use function array_merge;
 use function count;
@@ -42,26 +43,21 @@ abstract class BasePolicyOrSetAlgorithm extends BaseAlgorithm implements PolicyC
 {
     /**
      * @param array $targets
-     *
      * @return array
      */
     abstract protected function optimizeTargets(array $targets): array;
 
     /**
-     * @param ContextInterface     $context
-     * @param array                $policiesAndSetsData
+     * @param ContextInterface $context
+     * @param array $policiesAndSetsData
      * @param LoggerInterface|null $logger
-     *
      * @return array
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     public static function callPolicyAlgorithm(
         ContextInterface $context,
         array $policiesAndSetsData,
         ?LoggerInterface $logger
-    ): array
-    {
+    ): array {
         return static::callAlgorithm(
             static::getCallable($policiesAndSetsData),
             $context,
@@ -73,57 +69,52 @@ abstract class BasePolicyOrSetAlgorithm extends BaseAlgorithm implements PolicyC
 
     /**
      * @inheritdoc
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     public function optimize(array $policiesAndSets): array
     {
         assert(empty($policiesAndSets) === false);
 
-        $index              = 0;
-        $rawTargets         = [];
+        $index = 0;
+        $rawTargets = [];
         $serializedPolicies = [];
         foreach ($policiesAndSets as $policyOrSet) {
             /** @var PolicyInterface|PolicySetInterface $policyOrSet */
-            $rawTargets[$index]         = $policyOrSet->getTarget();
+            $rawTargets[$index] = $policyOrSet->getTarget();
             $serializedPolicies[$index] = $policyOrSet instanceof PolicyInterface ?
                 Encoder::encodePolicy($policyOrSet) : Encoder::encodePolicySet($policyOrSet);
             $index++;
         }
 
-        $callable         = static::METHOD;
+        $callable = static::METHOD;
         $optimizedTargets = $this->optimizeTargets($rawTargets);
 
         /** @var callable|array $callable */
-        assert($callable !== null && is_array($callable) === true &&
+        assert(
+            $callable !== null && is_array($callable) === true &&
             is_callable($callable) === true && count($callable) === 2 &&
-            is_string($callable[0]) === true && is_string($callable[1]) === true);
+            is_string($callable[0]) === true && is_string($callable[1]) === true
+        );
 
         return [
-            static::INDEX_TARGETS           => $optimizedTargets,
+            static::INDEX_TARGETS => $optimizedTargets,
             static::INDEX_POLICIES_AND_SETS => $serializedPolicies,
-            static::INDEX_CALLABLE          => $callable,
+            static::INDEX_CALLABLE => $callable,
         ];
     }
 
     /**
-     * @param ContextInterface     $context
-     * @param int                  $match
-     * @param array                $encodedPolicy
+     * @param ContextInterface $context
+     * @param int $match
+     * @param array $encodedPolicy
      * @param LoggerInterface|null $logger
-     *
      * @return array
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
-     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     public static function evaluatePolicy(
         ContextInterface $context,
         int $match,
         array $encodedPolicy,
         ?LoggerInterface $logger
-    ): array
-    {
+    ): array {
         assert(Encoder::isPolicy($encodedPolicy));
         assert($match !== TargetMatchEnum::NO_TARGET);
 
@@ -141,7 +132,7 @@ abstract class BasePolicyOrSetAlgorithm extends BaseAlgorithm implements PolicyC
         $policyName = null;
         if ($logger !== null) {
             $policyName = Encoder::policyName($encodedPolicy);
-            $matchName  = TargetMatchEnum::toString($match);
+            $matchName = TargetMatchEnum::toString($match);
             $logger->debug("Policy '$policyName' evaluation started for match '$matchName'.");
         }
 
@@ -155,11 +146,11 @@ abstract class BasePolicyOrSetAlgorithm extends BaseAlgorithm implements PolicyC
             if ($match === TargetMatchEnum::INDETERMINATE) {
                 // evaluate final result in accordance to table 7
                 $correctedEvaluation = static::correctEvaluationOnIntermediateTarget($evaluation, $logger);
-                $result              = static::packEvaluationResult($correctedEvaluation);
+                $result = static::packEvaluationResult($correctedEvaluation);
             } else {
                 $obligationsMap = Encoder::policyObligations($encodedPolicy);
-                $adviceMap      = Encoder::policyAdvice($encodedPolicy);
-                $result         = static::packEvaluationResult(
+                $adviceMap = Encoder::policyAdvice($encodedPolicy);
+                $result = static::packEvaluationResult(
                     $evaluation,
                     static::mergeFulfilledObligations($obligations, $evaluation, $obligationsMap),
                     static::mergeAppliedAdvice($advice, $evaluation, $adviceMap)
@@ -176,23 +167,18 @@ abstract class BasePolicyOrSetAlgorithm extends BaseAlgorithm implements PolicyC
     }
 
     /**
-     * @param ContextInterface     $context
-     * @param int                  $match
-     * @param array                $encodedPolicySet
+     * @param ContextInterface $context
+     * @param int $match
+     * @param array $encodedPolicySet
      * @param LoggerInterface|null $logger
-     *
      * @return array
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
-     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     public static function evaluatePolicySet(
         ContextInterface $context,
         int $match,
         array $encodedPolicySet,
         ?LoggerInterface $logger
-    ): array
-    {
+    ): array {
         assert(Encoder::isPolicySet($encodedPolicySet));
 
         /** @see http://docs.oasis-open.org/xacml/3.0/xacml-3.0-core-spec-os-en.html #7.13 (table 6) */
@@ -209,7 +195,7 @@ abstract class BasePolicyOrSetAlgorithm extends BaseAlgorithm implements PolicyC
         $policySetName = null;
         if ($logger !== null) {
             $policySetName = Encoder::policySetName($encodedPolicySet);
-            $matchName     = TargetMatchEnum::toString($match);
+            $matchName = TargetMatchEnum::toString($match);
             $logger->debug("Policy set '$policySetName' evaluation started for match '$matchName'.");
         }
 
@@ -226,11 +212,11 @@ abstract class BasePolicyOrSetAlgorithm extends BaseAlgorithm implements PolicyC
             if ($match === TargetMatchEnum::INDETERMINATE) {
                 // evaluate final result in accordance to table 7
                 $correctedEvaluation = static::correctEvaluationOnIntermediateTarget($evaluation, $logger);
-                $result              = static::packEvaluationResult($correctedEvaluation);
+                $result = static::packEvaluationResult($correctedEvaluation);
             } else {
                 $obligationsMap = Encoder::policySetObligations($encodedPolicySet);
-                $adviceMap      = Encoder::policySetAdvice($encodedPolicySet);
-                $result         = static::packEvaluationResult(
+                $adviceMap = Encoder::policySetAdvice($encodedPolicySet);
+                $result = static::packEvaluationResult(
                     $evaluation,
                     static::mergeFulfilledObligations($obligations, $evaluation, $obligationsMap),
                     static::mergeAppliedAdvice($advice, $evaluation, $adviceMap)
@@ -248,16 +234,13 @@ abstract class BasePolicyOrSetAlgorithm extends BaseAlgorithm implements PolicyC
 
     /**
      * @inheritdoc
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     public static function evaluateItem(
         ContextInterface $context,
         int $match,
         array $encodedItem,
         ?LoggerInterface $logger
-    ): array
-    {
+    ): array {
         $isSet = Encoder::isPolicySet($encodedItem);
 
         return $isSet === true ?
@@ -266,12 +249,9 @@ abstract class BasePolicyOrSetAlgorithm extends BaseAlgorithm implements PolicyC
     }
 
     /**
-     * @param int                  $evaluation
+     * @param int $evaluation
      * @param LoggerInterface|null $logger
-     *
      * @return int
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     private static function correctEvaluationOnIntermediateTarget(int $evaluation, ?LoggerInterface $logger): int
     {
@@ -304,7 +284,7 @@ abstract class BasePolicyOrSetAlgorithm extends BaseAlgorithm implements PolicyC
 
         if ($logger !== null) {
             $fromEval = EvaluationEnum::toString($evaluation);
-            $toEval   = EvaluationEnum::toString($result);
+            $toEval = EvaluationEnum::toString($result);
             $logger->info("Due to error while checking target the evaluation changed from '$fromEval' to '$toEval'.");
         }
 
@@ -313,7 +293,6 @@ abstract class BasePolicyOrSetAlgorithm extends BaseAlgorithm implements PolicyC
 
     /**
      * @param array $policiesAndSetsData
-     *
      * @return array
      */
     private static function getTargets(array $policiesAndSetsData): array
@@ -323,7 +302,6 @@ abstract class BasePolicyOrSetAlgorithm extends BaseAlgorithm implements PolicyC
 
     /**
      * @param array $policiesAndSetsData
-     *
      * @return array
      */
     private static function getPoliciesAndSets(array $policiesAndSetsData): array
@@ -333,7 +311,6 @@ abstract class BasePolicyOrSetAlgorithm extends BaseAlgorithm implements PolicyC
 
     /**
      * @param array $policiesAndSetsData
-     *
      * @return callable
      */
     private static function getCallable(array $policiesAndSetsData): callable
@@ -343,28 +320,22 @@ abstract class BasePolicyOrSetAlgorithm extends BaseAlgorithm implements PolicyC
 
     /**
      * @param array $obligations
-     * @param int   $evaluation
+     * @param int $evaluation
      * @param array $obligationsMap
-     *
      * @return array
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
      */
-    private static function mergeFulfilledObligations(array $obligations, $evaluation, array $obligationsMap): array
+    private static function mergeFulfilledObligations(array $obligations, int $evaluation, array $obligationsMap): array
     {
         return array_merge($obligations, Encoder::getFulfillObligations($evaluation, $obligationsMap));
     }
 
     /**
      * @param array $advice
-     * @param int   $evaluation
+     * @param int $evaluation
      * @param array $adviceMap
-     *
      * @return array
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
      */
-    private static function mergeAppliedAdvice(array $advice, $evaluation, array $adviceMap): array
+    private static function mergeAppliedAdvice(array $advice, int $evaluation, array $adviceMap): array
     {
         return array_merge($advice, Encoder::getAppliedAdvice($evaluation, $adviceMap));
     }

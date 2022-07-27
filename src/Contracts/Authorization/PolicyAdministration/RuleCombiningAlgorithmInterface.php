@@ -27,17 +27,16 @@ namespace Whoa\Auth\Contracts\Authorization\PolicyAdministration;
 interface RuleCombiningAlgorithmInterface
 {
     /** Optimization data index */
-    const INDEX_TARGETS = 0;
+    public const INDEX_TARGETS = 0;
 
     /** Optimization data index */
-    const INDEX_RULES = self::INDEX_TARGETS + 1;
+    public const INDEX_RULES = self::INDEX_TARGETS + 1;
 
     /** Optimization data index */
-    const INDEX_CALLABLE = self::INDEX_RULES + 1;
+    public const INDEX_CALLABLE = self::INDEX_RULES + 1;
 
     /**
      * @param RuleInterface[] $rules
-     *
      * @return array
      */
     public function optimize(array $rules): array;

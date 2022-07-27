@@ -32,14 +32,13 @@ class RulesDenyOverrides extends BaseRuleAlgorithm
     use DefaultTargetSerializeTrait;
 
     /** @inheritdoc */
-    const METHOD = [self::class, 'evaluate'];
+    public const METHOD = [self::class, 'evaluate'];
 
     /**
-     * @param ContextInterface     $context
-     * @param array                $optimizedTargets
-     * @param array                $serializedRules
+     * @param ContextInterface $context
+     * @param array $optimizedTargets
+     * @param array $serializedRules
      * @param LoggerInterface|null $logger
-     *
      * @return array
      */
     public static function evaluate(
@@ -47,8 +46,7 @@ class RulesDenyOverrides extends BaseRuleAlgorithm
         array $optimizedTargets,
         array $serializedRules,
         ?LoggerInterface $logger
-    ): array
-    {
+    ): array {
         return static::evaluateDenyOverrides($context, $optimizedTargets, $serializedRules, $logger);
     }
 }

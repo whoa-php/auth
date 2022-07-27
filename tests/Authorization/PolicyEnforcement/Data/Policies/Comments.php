@@ -21,6 +21,8 @@ declare(strict_types=1);
 
 namespace Whoa\Tests\Auth\Authorization\PolicyEnforcement\Data\Policies;
 
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Whoa\Auth\Authorization\PolicyAdministration\Advice;
 use Whoa\Auth\Authorization\PolicyAdministration\Logical;
 use Whoa\Auth\Authorization\PolicyAdministration\Obligation;
@@ -33,6 +35,7 @@ use Whoa\Auth\Contracts\Authorization\PolicyAdministration\PolicyInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\RuleInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyInformation\ContextInterface;
 use Whoa\Tests\Auth\Authorization\PolicyEnforcement\Data\ContextProperties;
+use Whoa\Tests\Auth\Authorization\PolicyEnforcement\Data\RequestProperties;
 use Whoa\Tests\Auth\Authorization\PolicyEnforcement\PolicyEnforcementTest;
 
 /**
@@ -41,12 +44,12 @@ use Whoa\Tests\Auth\Authorization\PolicyEnforcement\PolicyEnforcementTest;
 abstract class Comments extends General
 {
     /** Operation identity */
-    const RESOURCE_TYPE = 'comments';
+    public const RESOURCE_TYPE = 'comments';
 
     /**
      * @return PolicyInterface
      */
-    public static function getPolicies()
+    public static function getPolicies(): PolicyInterface
     {
         return (new Policy([
             static::onIndex(),
@@ -56,14 +59,14 @@ abstract class Comments extends General
             static::onDelete(),
         ], RuleAlgorithm::permitOverrides())
         )
-            ->setTarget(static::target(ContextProperties::REQUEST_RESOURCE_TYPE, static::RESOURCE_TYPE))
+            ->setTarget(static::target(RequestProperties::REQUEST_RESOURCE_TYPE, static::RESOURCE_TYPE))
             ->setName('Comments');
     }
 
     /**
      * @return RuleInterface
      */
-    protected static function onIndex()
+    protected static function onIndex(): RuleInterface
     {
         return (new Rule())->setTarget(static::targetOperationIndex())->setName('index');
     }
@@ -71,7 +74,7 @@ abstract class Comments extends General
     /**
      * @return RuleInterface
      */
-    protected static function onRead()
+    protected static function onRead(): RuleInterface
     {
         return (new Rule())->setTarget(static::targetOperationRead())->setName('read');
     }
@@ -79,27 +82,31 @@ abstract class Comments extends General
     /**
      * @return RuleInterface
      */
-    protected static function onCreate()
+    protected static function onCreate(): RuleInterface
     {
         $obligation = new Obligation(EvaluationEnum::PERMIT, [PolicyEnforcementTest::class, 'markObligationAsCalled']);
-        $advice     = new Advice(EvaluationEnum::PERMIT, [PolicyEnforcementTest::class, 'markAdviceAsCalled']);
+        $advice = new Advice(EvaluationEnum::PERMIT, [PolicyEnforcementTest::class, 'markAdviceAsCalled']);
 
-        return (new Rule())->setTarget(static::targetMulti([
-            ContextProperties::REQUEST_OPERATION         => static::OPERATION_CREATE,
-            ContextProperties::CONTEXT_USER_IS_SIGNED_IN => true,
-        ]))->setName('create')->setObligations([$obligation])->setAdvice([$advice]);
+        return (new Rule())->setTarget(
+            static::targetMulti([
+                RequestProperties::REQUEST_OPERATION => static::OPERATION_CREATE,
+                ContextProperties::CONTEXT_USER_IS_SIGNED_IN => true,
+            ])
+        )->setName('create')->setObligations([$obligation])->setAdvice([$advice]);
     }
 
     /**
      * @return RuleInterface
      */
-    protected static function onUpdate()
+    protected static function onUpdate(): RuleInterface
     {
         return (new Rule())
-            ->setTarget(static::targetMulti([
-                ContextProperties::REQUEST_OPERATION         => static::OPERATION_UPDATE,
-                ContextProperties::CONTEXT_USER_IS_SIGNED_IN => true,
-            ]))
+            ->setTarget(
+                static::targetMulti([
+                    RequestProperties::REQUEST_OPERATION => static::OPERATION_UPDATE,
+                    ContextProperties::CONTEXT_USER_IS_SIGNED_IN => true,
+                ])
+            )
             ->setCondition(static::conditionIsCommentOwnerOrAdmin())
             ->setName('update');
     }
@@ -115,29 +122,30 @@ abstract class Comments extends General
     /**
      * @return RuleInterface
      */
-    protected static function onDelete()
+    protected static function onDelete(): RuleInterface
     {
         return (new Rule())
-            ->setTarget(static::targetMulti([
-                ContextProperties::REQUEST_OPERATION         => static::OPERATION_DELETE,
-                ContextProperties::CONTEXT_USER_IS_SIGNED_IN => true,
-            ]))
+            ->setTarget(
+                static::targetMulti([
+                    RequestProperties::REQUEST_OPERATION => static::OPERATION_DELETE,
+                    ContextProperties::CONTEXT_USER_IS_SIGNED_IN => true,
+                ])
+            )
             ->setCondition(static::conditionIsCommentOwnerOrAdmin())
             ->setName('delete');
     }
 
     /**
      * @param ContextInterface $context
-     *
      * @return bool
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
-    public static function isCommentOwnerOrAdmin(ContextInterface $context)
+    public static function isCommentOwnerOrAdmin(ContextInterface $context): bool
     {
-        $commentId = $context->get(ContextProperties::REQUEST_RESOURCE_IDENTITY);
+        $commentId = $context->get(RequestProperties::REQUEST_RESOURCE_IDENTITY);
         // for testing purposes let's pretend current user is owner of comment with ID 123
         $isOwner = $commentId === 123;
-        $result  = $isOwner === true || static::isAdmin($context) === true;
-
-        return $result;
+        return $isOwner === true || static::isAdmin($context) === true;
     }
 }

@@ -22,6 +22,7 @@ declare(strict_types=1);
 namespace Whoa\Auth\Authorization\PolicyAdministration;
 
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\MethodInterface;
+
 use function assert;
 use function count;
 use function is_array;

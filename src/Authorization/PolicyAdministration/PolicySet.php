@@ -37,40 +37,40 @@ class PolicySet implements PolicySetInterface
     /**
      * @var string|null
      */
-    private $name;
+    private ?string $name;
 
     /**
-     * @var TargetInterface
+     * @var TargetInterface|null
      */
-    private $target;
+    private ?TargetInterface $target = null;
 
     /**
      * @var PolicyInterface[]|PolicySetInterface[]
      */
-    private $policiesAndSets;
+    private array $policiesAndSets;
 
     /**
      * @var PolicyCombiningAlgorithmInterface
      */
-    private $combiningAlgorithm;
+    private PolicyCombiningAlgorithmInterface $combiningAlgorithm;
 
     /**
      * @var MethodInterface[]
      */
-    private $obligations;
+    private array $obligations;
 
     /**
      * @var MethodInterface[]
      */
-    private $advice;
+    private array $advice;
 
     /**
      * @param PolicyInterface[]|PolicySetInterface[] $policiesAndSets
-     * @param PolicyCombiningAlgorithmInterface      $combiningAlgorithm
-     * @param null|string                            $name
-     * @param TargetInterface                        $target
-     * @param MethodInterface[]                      $obligations
-     * @param MethodInterface[]                      $advice
+     * @param PolicyCombiningAlgorithmInterface $combiningAlgorithm
+     * @param null|string $name
+     * @param TargetInterface|null $target
+     * @param MethodInterface[] $obligations
+     * @param MethodInterface[] $advice
      */
     public function __construct(
         array $policiesAndSets,
@@ -79,8 +79,7 @@ class PolicySet implements PolicySetInterface
         TargetInterface $target = null,
         array $obligations = [],
         array $advice = []
-    )
-    {
+    ) {
         $this->setName($name)->setTarget($target)
             ->setPoliciesAndSets($policiesAndSets)->setCombiningAlgorithm($combiningAlgorithm)
             ->setObligations($obligations)->setAdvice($advice);
@@ -96,7 +95,6 @@ class PolicySet implements PolicySetInterface
 
     /**
      * @param null|string $name
-     *
      * @return self
      */
     public function setName(?string $name): self
@@ -116,7 +114,6 @@ class PolicySet implements PolicySetInterface
 
     /**
      * @param TargetInterface|null $target
-     *
      * @return self
      */
     public function setTarget(?TargetInterface $target): self
@@ -136,7 +133,6 @@ class PolicySet implements PolicySetInterface
 
     /**
      * @param PolicyInterface[]|PolicySetInterface[] $policiesAndSets
-     *
      * @return self
      */
     public function setPoliciesAndSets(array $policiesAndSets): self
@@ -156,7 +152,6 @@ class PolicySet implements PolicySetInterface
 
     /**
      * @param PolicyCombiningAlgorithmInterface $combiningAlgorithm
-     *
      * @return self
      */
     public function setCombiningAlgorithm(PolicyCombiningAlgorithmInterface $combiningAlgorithm): self
@@ -176,7 +171,6 @@ class PolicySet implements PolicySetInterface
 
     /**
      * @param ObligationInterface[] $obligations
-     *
      * @return self
      */
     public function setObligations(array $obligations): self
@@ -196,7 +190,6 @@ class PolicySet implements PolicySetInterface
 
     /**
      * @param AdviceInterface[] $advice
-     *
      * @return self
      */
     public function setAdvice(array $advice): self

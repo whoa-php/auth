@@ -47,17 +47,17 @@ class PolicyDecisionTest extends TestCase
     /**
      * @var bool
      */
-    private static $wasConditionCalled = false;
+    private static bool $wasConditionCalled = false;
 
     /**
      * @var bool
      */
-    private static $wasObligationCalled = false;
+    private static bool $wasObligationCalled = false;
 
     /**
      * @var bool
      */
-    private static $wasAdviceCalled = false;
+    private static bool $wasAdviceCalled = false;
 
     /**
      * @inheritdoc
@@ -66,15 +66,15 @@ class PolicyDecisionTest extends TestCase
     {
         parent::setUp();
 
-        static::$wasConditionCalled  = false;
+        static::$wasConditionCalled = false;
         static::$wasObligationCalled = false;
-        static::$wasAdviceCalled     = false;
+        static::$wasAdviceCalled = false;
     }
 
     /**
      * @return array
      */
-    public function testOptimize()
+    public function testOptimize(): array
     {
         $algorithm = RuleAlgorithm::denyUnlessPermit();
 
@@ -99,7 +99,7 @@ class PolicyDecisionTest extends TestCase
         $algorithm = RuleAlgorithm::denyUnlessPermit();
         [$callable, $targets, $rules] = $this->optimizedRules($algorithm, $this->createRules(false));
 
-        $logger  = null;
+        $logger = null;
         $context = new Context(new Request([]), []);
         $this->assertEquals(
             [EvaluationEnum::DENY, [], []],
@@ -114,7 +114,7 @@ class PolicyDecisionTest extends TestCase
     {
         [$callable, $targets, $rules] = $this->testOptimize();
 
-        $logger  = null;
+        $logger = null;
         $context = new Context(new Request([]), []);
         $this->assertEquals(
             [EvaluationEnum::PERMIT, [], []],
@@ -129,12 +129,14 @@ class PolicyDecisionTest extends TestCase
     {
         [$callable, $targets, $rules] = $this->testOptimize();
 
-        $logger  = null;
-        $context = new Context(new Request([
-            'key11_1' => 'value11_1',
-            'key11_2' => 'value11_2',
-            'key11_3' => 'value11_3',
-        ]), []);
+        $logger = null;
+        $context = new Context(
+            new Request([
+                'key11_1' => 'value11_1',
+                'key11_2' => 'value11_2',
+                'key11_3' => 'value11_3',
+            ]), []
+        );
         $this->assertEquals(
             [EvaluationEnum::PERMIT, [[self::class, 'ruleObligation1']], [[self::class, 'ruleAdvice1']]],
             call_user_func($callable, $context, $targets, $rules, $logger)
@@ -149,12 +151,14 @@ class PolicyDecisionTest extends TestCase
         [$callable, $targets, $rules] = $this->testOptimize();
 
         // value pairs could be split (should be no difference)
-        $logger  = null;
-        $context = new Context(new Request([
-            'key12_1' => 'value12_1',
-        ]), [
-            'key12_2' => 'value12_2',
-        ]);
+        $logger = null;
+        $context = new Context(
+            new Request([
+                'key12_1' => 'value12_1',
+            ]), [
+                'key12_2' => 'value12_2',
+            ]
+        );
         $this->assertEquals(
             [EvaluationEnum::PERMIT, [[self::class, 'ruleObligation1']], [[self::class, 'ruleAdvice1']]],
             call_user_func($callable, $context, $targets, $rules, $logger)
@@ -169,12 +173,14 @@ class PolicyDecisionTest extends TestCase
         $algorithm = RuleAlgorithm::denyOverrides();
         [$callable, $targets, $rules] = $this->optimizedRules($algorithm, $this->createRules());
 
-        $logger  = null;
-        $context = new Context(new Request([
-            'key21_1' => 'value21_1',
-            'key21_2' => 'value21_2',
-            'key21_3' => 'value21_3',
-        ]), []);
+        $logger = null;
+        $context = new Context(
+            new Request([
+                'key21_1' => 'value21_1',
+                'key21_2' => 'value21_2',
+                'key21_3' => 'value21_3',
+            ]), []
+        );
         $this->assertEquals(
             [EvaluationEnum::DENY, [[self::class, 'ruleObligation2']], [[self::class, 'ruleAdvice2']]],
             call_user_func($callable, $context, $targets, $rules, $logger)
@@ -189,12 +195,14 @@ class PolicyDecisionTest extends TestCase
         $algorithm = RuleAlgorithm::denyUnlessPermit();
         [$callable, $targets, $rules] = $this->optimizedRules($algorithm, $this->createRules(false, true));
 
-        $logger  = null;
-        $context = new Context(new Request([
-            'key11_1' => 'value11_1',
-            'key11_2' => 'value11_2',
-            'key11_3' => 'value11_3',
-        ]), []);
+        $logger = null;
+        $context = new Context(
+            new Request([
+                'key11_1' => 'value11_1',
+                'key11_2' => 'value11_2',
+                'key11_3' => 'value11_3',
+            ]), []
+        );
         $this->assertEquals(
             [EvaluationEnum::DENY, [], []],
             call_user_func($callable, $context, $targets, $rules, $logger)
@@ -209,9 +217,9 @@ class PolicyDecisionTest extends TestCase
         $algorithm = RuleAlgorithm::denyUnlessPermit();
         [$callable, $targets, $rules] = $this->optimizedRules($algorithm, $this->createRules(false));
 
-        $logger          = null;
+        $logger = null;
         $exceptionThrown = false;
-        $context         = new Context(new Request([]), [
+        $context = new Context(new Request([]), [
             'key11_1' => function () use (&$exceptionThrown) {
                 $exceptionThrown = true;
                 throw new RuntimeException();
@@ -234,7 +242,7 @@ class PolicyDecisionTest extends TestCase
             ->setCondition(new Logical([self::class, 'ruleConditionFalse']));
         [$callable, $targets, $rules] = $this->optimizedRules(RuleAlgorithm::denyUnlessPermit(), [$rule]);
 
-        $logger  = null;
+        $logger = null;
         $context = new Context(new Request([]), ['key' => 'value']);
         $this->assertEquals(
             [EvaluationEnum::DENY, [], []],
@@ -253,7 +261,7 @@ class PolicyDecisionTest extends TestCase
             ->setEffect(new Logical([self::class, 'logicalThrowsException']));
         [$callable, $targets, $rules] = $this->optimizedRules(RuleAlgorithm::permitOverrides(), [$rule]);
 
-        $logger  = null;
+        $logger = null;
         $context = new Context(new Request([]), ['key' => 'value']);
         $this->assertEquals(
             [EvaluationEnum::DENY, [], []],
@@ -264,10 +272,9 @@ class PolicyDecisionTest extends TestCase
 
     /**
      * @param ContextInterface $context
-     *
      * @return bool
      */
-    public static function ruleCondition(ContextInterface $context)
+    public static function ruleCondition(ContextInterface $context): bool
     {
         static::assertNotNull($context);
 
@@ -278,10 +285,9 @@ class PolicyDecisionTest extends TestCase
 
     /**
      * @param ContextInterface $context
-     *
      * @return bool
      */
-    public static function ruleConditionFalse(ContextInterface $context)
+    public static function ruleConditionFalse(ContextInterface $context): bool
     {
         static::assertNotNull($context);
 
@@ -292,7 +298,6 @@ class PolicyDecisionTest extends TestCase
 
     /**
      * @param ContextInterface $context
-     *
      * @throws RuntimeException
      */
     public static function logicalThrowsException(ContextInterface $context)
@@ -342,10 +347,9 @@ class PolicyDecisionTest extends TestCase
 
     /**
      * @param ContextInterface $context
-     *
      * @return bool
      */
-    public static function effectDeny(ContextInterface $context)
+    public static function effectDeny(ContextInterface $context): bool
     {
         static::assertNotNull($context);
 
@@ -354,11 +358,10 @@ class PolicyDecisionTest extends TestCase
 
     /**
      * @param RuleCombiningAlgorithmInterface $algorithm
-     * @param RuleInterface[]                 $rules
-     *
+     * @param RuleInterface[] $rules
      * @return array
      */
-    private function optimizedRules(RuleCombiningAlgorithmInterface $algorithm, array $rules)
+    private function optimizedRules(RuleCombiningAlgorithmInterface $algorithm, array $rules): array
     {
         $this->assertNotEmpty($optimized = $algorithm->optimize($rules));
         $this->assertNotEmpty($targets = $optimized[RuleCombiningAlgorithmInterface::INDEX_TARGETS]);
@@ -371,10 +374,9 @@ class PolicyDecisionTest extends TestCase
     /**
      * @param bool $addTargetAll
      * @param bool $exInCondition
-     *
      * @return RuleInterface[]
      */
-    private function createRules($addTargetAll = true, $exInCondition = false)
+    private function createRules(bool $addTargetAll = true, bool $exInCondition = false): array
     {
         $allOf11 = new AllOf([
             'key11_1' => 'value11_1',
@@ -394,7 +396,7 @@ class PolicyDecisionTest extends TestCase
             'key22_1' => 'value22_1',
             'key22_2' => 'value22_2',
         ]);
-        $allOf3  = new AllOf([
+        $allOf3 = new AllOf([
             'key31' => 'value31',
         ]);
 
@@ -407,19 +409,19 @@ class PolicyDecisionTest extends TestCase
         $target3 = new Target($anyOf3);
 
         $methodName = $exInCondition === true ? 'logicalThrowsException' : 'ruleCondition';
-        $rule1      = (new Rule())
+        $rule1 = (new Rule())
             ->setTarget($target1)
             ->setCondition(new Logical([self::class, $methodName]))
             ->setObligations([new Obligation(EvaluationEnum::PERMIT, [self::class, 'ruleObligation1'])])
             ->setAdvice([new Advice(EvaluationEnum::PERMIT, [self::class, 'ruleAdvice1'])]);
-        $rule2      = (new Rule())
+        $rule2 = (new Rule())
             ->setEffect(new Logical([self::class, 'effectDeny']))
             ->setTarget($target2)
             ->setCondition(new Logical([self::class, $methodName]))
             ->setObligations([new Obligation(EvaluationEnum::DENY, [self::class, 'ruleObligation2'])])
             ->setAdvice([new Advice(EvaluationEnum::DENY, [self::class, 'ruleAdvice2'])]);
-        $rule3      = (new Rule())->setTarget($target3);
-        $rule4      = new Rule();
+        $rule3 = (new Rule())->setTarget($target3);
+        $rule4 = new Rule();
 
         return $addTargetAll === true ? [$rule1, $rule2, $rule3, $rule4] : [$rule1, $rule2, $rule3];
     }
@@ -427,10 +429,9 @@ class PolicyDecisionTest extends TestCase
     /**
      * @param string $key
      * @param string $value
-     *
      * @return TargetInterface
      */
-    private function target($key, $value)
+    private function target(string $key, string $value)
     {
         return new Target(new AnyOf([new AllOf([$key => $value])]));
     }

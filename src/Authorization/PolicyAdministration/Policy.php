@@ -27,6 +27,7 @@ use Whoa\Auth\Contracts\Authorization\PolicyAdministration\PolicyInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\RuleCombiningAlgorithmInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\RuleInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\TargetInterface;
+
 use function assert;
 
 /**
@@ -37,40 +38,40 @@ class Policy implements PolicyInterface
     /**
      * @var string|null
      */
-    private $name;
+    private ?string $name;
 
     /**
      * @var TargetInterface|null
      */
-    private $target;
+    private ?TargetInterface $target;
 
     /**
      * @var RuleInterface[]
      */
-    private $rules;
+    private array $rules;
 
     /**
      * @var RuleCombiningAlgorithmInterface
      */
-    private $combiningAlgorithm;
+    private RuleCombiningAlgorithmInterface $combiningAlgorithm;
 
     /**
      * @var ObligationInterface[]
      */
-    private $obligations;
+    private array $obligations;
 
     /**
      * @var AdviceInterface[]
      */
-    private $advice;
+    private array $advice;
 
     /**
-     * @param RuleInterface[]                 $rules
+     * @param RuleInterface[] $rules
      * @param RuleCombiningAlgorithmInterface $combiningAlgorithm
-     * @param null|string                     $name
-     * @param TargetInterface|null            $target
-     * @param ObligationInterface[]           $obligations
-     * @param AdviceInterface[]               $advice
+     * @param null|string $name
+     * @param TargetInterface|null $target
+     * @param ObligationInterface[] $obligations
+     * @param AdviceInterface[] $advice
      */
     public function __construct(
         array $rules,
@@ -79,8 +80,7 @@ class Policy implements PolicyInterface
         TargetInterface $target = null,
         array $obligations = [],
         array $advice = []
-    )
-    {
+    ) {
         $this->setName($name)->setTarget($target)->setRules($rules)->setCombiningAlgorithm($combiningAlgorithm)
             ->setObligations($obligations)->setAdvice($advice);
     }
@@ -95,7 +95,6 @@ class Policy implements PolicyInterface
 
     /**
      * @param null|string $name
-     *
      * @return self
      */
     public function setName(?string $name): self
@@ -115,7 +114,6 @@ class Policy implements PolicyInterface
 
     /**
      * @param TargetInterface|null $target
-     *
      * @return self
      */
     public function setTarget(?TargetInterface $target): self
@@ -135,7 +133,6 @@ class Policy implements PolicyInterface
 
     /**
      * @param RuleInterface[] $rules
-     *
      * @return self
      */
     public function setRules(array $rules): self
@@ -157,7 +154,6 @@ class Policy implements PolicyInterface
 
     /**
      * @param RuleCombiningAlgorithmInterface $combiningAlgorithm
-     *
      * @return self
      */
     public function setCombiningAlgorithm(RuleCombiningAlgorithmInterface $combiningAlgorithm): self
@@ -177,7 +173,6 @@ class Policy implements PolicyInterface
 
     /**
      * @param ObligationInterface[] $obligations
-     *
      * @return self
      */
     public function setObligations(array $obligations): self
@@ -197,7 +192,6 @@ class Policy implements PolicyInterface
 
     /**
      * @param AdviceInterface[] $advice
-     *
      * @return self
      */
     public function setAdvice(array $advice): self

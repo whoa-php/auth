@@ -22,6 +22,7 @@ declare(strict_types=1);
 namespace Whoa\Auth\Authorization\PolicyAdministration;
 
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\AllOfInterface;
+
 use function assert;
 
 /**
@@ -32,7 +33,7 @@ class AllOf implements AllOfInterface
     /**
      * @var array
      */
-    private $pairs;
+    private array $pairs;
 
     /**
      * @param array $pairs

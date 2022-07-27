@@ -32,16 +32,16 @@ class Target implements TargetInterface
     /**
      * @var null|string
      */
-    private $name;
+    private ?string $name;
 
     /**
      * @var AnyOfInterface
      */
-    private $anyOff;
+    private AnyOfInterface $anyOff;
 
     /**
      * @param AnyOfInterface $anyOff
-     * @param string|null    $name
+     * @param string|null $name
      */
     public function __construct(AnyOfInterface $anyOff, string $name = null)
     {
@@ -66,10 +66,9 @@ class Target implements TargetInterface
 
     /**
      * @param null|string $name
-     *
      * @return $this
      */
-    public function setName(?string $name)
+    public function setName(?string $name): Target
     {
         $this->name = $name;
 
@@ -78,7 +77,6 @@ class Target implements TargetInterface
 
     /**
      * @param AnyOfInterface $anyOff
-     *
      * @return self
      */
     public function setAnyOff(AnyOfInterface $anyOff): self

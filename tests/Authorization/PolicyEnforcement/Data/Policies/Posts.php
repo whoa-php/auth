@@ -27,21 +27,21 @@ use Whoa\Auth\Authorization\PolicyDecision\RuleAlgorithm;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\PolicyInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\RuleInterface;
 use Whoa\Tests\Auth\Authorization\PolicyEnforcement\Data\ContextProperties;
+use Whoa\Tests\Auth\Authorization\PolicyEnforcement\Data\RequestProperties;
 
 /**
  * The idea about this class is to provide Rules with simple targets that could be replaced with a switch.
- *
  * @package Whoa\Tests\Auth
  */
 abstract class Posts extends General
 {
     /** Operation identity */
-    const RESOURCE_TYPE = 'posts';
+    public const RESOURCE_TYPE = 'posts';
 
     /**
      * @return PolicyInterface
      */
-    public static function getPolicies()
+    public static function getPolicies(): PolicyInterface
     {
         return (new Policy([
             static::onIndex(),
@@ -50,14 +50,14 @@ abstract class Posts extends General
             static::onDelete(),
         ], RuleAlgorithm::firstApplicable())
         )
-            ->setTarget(static::target(ContextProperties::REQUEST_RESOURCE_TYPE, static::RESOURCE_TYPE))
+            ->setTarget(static::target(RequestProperties::REQUEST_RESOURCE_TYPE, static::RESOURCE_TYPE))
             ->setName('Posts');
     }
 
     /**
      * @return RuleInterface
      */
-    protected static function onIndex()
+    protected static function onIndex(): RuleInterface
     {
         return (new Rule())->setTarget(static::targetOperationIndex())->setName('index');
     }
@@ -65,7 +65,7 @@ abstract class Posts extends General
     /**
      * @return RuleInterface
      */
-    protected static function onRead()
+    protected static function onRead(): RuleInterface
     {
         return (new Rule())->setTarget(static::targetOperationRead())->setName('read');
     }
@@ -73,7 +73,7 @@ abstract class Posts extends General
     /**
      * @return RuleInterface
      */
-    protected static function onUpdate()
+    protected static function onUpdate(): RuleInterface
     {
         return (new Rule())->setTarget(static::targetOperationUpdate())->setName('update');
     }
@@ -81,7 +81,7 @@ abstract class Posts extends General
     /**
      * @return RuleInterface
      */
-    protected static function onDelete()
+    protected static function onDelete(): RuleInterface
     {
         return (new Rule())->setTarget(static::targetOperationDelete())->setName('delete');
     }

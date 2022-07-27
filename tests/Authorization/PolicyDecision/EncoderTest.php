@@ -40,7 +40,7 @@ class EncoderTest extends TestCase
 {
     public function testEncodePolicy()
     {
-        $ruleIsAdmin  = (new Rule())->setTarget($this->target('role', 'admin'));
+        $ruleIsAdmin = (new Rule())->setTarget($this->target('role', 'admin'));
         $createPolicy =
             (new Policy([$ruleIsAdmin], RuleAlgorithm::denyUnlessPermit()))->setTarget($this->target('op', 'create'));
 
@@ -56,13 +56,13 @@ class EncoderTest extends TestCase
 
     public function testEncodePolicySet()
     {
-        $ruleIsAdmin  = (new Rule())->setTarget($this->target('role', 'admin'));
+        $ruleIsAdmin = (new Rule())->setTarget($this->target('role', 'admin'));
         $ruleIsEditor = (new Rule())->setTarget($this->target('role', 'editor'));
         $createPolicy = (new Policy([$ruleIsAdmin], RuleAlgorithm::denyUnlessPermit()))
             ->setTarget($this->target('op', 'create'));
         $updatePolicy = (new Policy([$ruleIsEditor], RuleAlgorithm::denyUnlessPermit()))
             ->setTarget($this->target('op', 'update'));
-        $policySet    = (new PolicySet([$createPolicy, $updatePolicy], PolicyAlgorithm::denyUnlessPermit()))
+        $policySet = (new PolicySet([$createPolicy, $updatePolicy], PolicyAlgorithm::denyUnlessPermit()))
             ->setTarget($this->target('type', 'some_resource'));
 
         // Returned value represents set in internal format. We won't check
@@ -75,10 +75,9 @@ class EncoderTest extends TestCase
     /**
      * @param string $key
      * @param string $value
-     *
      * @return TargetInterface
      */
-    private function target($key, $value)
+    private function target(string $key, string $value)
     {
         return new Target(new AnyOf([new AllOf([$key => $value])]));
     }

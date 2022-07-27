@@ -29,163 +29,151 @@ use Whoa\Auth\Contracts\Authorization\PolicyAdministration\PolicyInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\PolicySetInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\RuleCombiningAlgorithmInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\RuleInterface;
+
 use function assert;
 use function array_key_exists;
 
 /**
  * @package Whoa\Auth
- *
- * @SuppressWarnings(PHPMD.TooManyMethods)
- * @SuppressWarnings(PHPMD.TooManyPublicMethods)
  */
 class Encoder
 {
     use DefaultTargetSerializeTrait;
 
     /** Type index */
-    const TYPE = 0;
+    public const TYPE = 0;
 
     /** Encoded type */
-    const TYPE_TARGET = 0;
+    public const TYPE_TARGET = 0;
 
     /** Encoded type */
-    const TYPE_RULE = self::TYPE_TARGET + 1;
+    public const TYPE_RULE = self::TYPE_TARGET + 1;
 
     /** Encoded type */
-    const TYPE_POLICY = self::TYPE_RULE + 1;
+    public const TYPE_POLICY = self::TYPE_RULE + 1;
 
     /** Encoded type */
-    const TYPE_POLICY_SET = self::TYPE_POLICY + 1;
+    public const TYPE_POLICY_SET = self::TYPE_POLICY + 1;
 
     /** Encoded type */
-    const TYPE_RULES = self::TYPE_POLICY_SET + 1;
+    public const TYPE_RULES = self::TYPE_POLICY_SET + 1;
 
     /** Encoded type */
-    const TYPE_POLICIES_AND_SETS = self::TYPE_RULES + 1;
+    public const TYPE_POLICIES_AND_SETS = self::TYPE_RULES + 1;
 
     /** Rule index */
-    const TARGET_NAME = self::TYPE + 1;
+    public const TARGET_NAME = self::TYPE + 1;
 
     /** Rule index */
-    const TARGET_ANY_OFS = self::TARGET_NAME + 1;
+    public const TARGET_ANY_OFS = self::TARGET_NAME + 1;
 
     /** Rule index */
-    const RULE_NAME = self::TYPE + 1;
+    public const RULE_NAME = self::TYPE + 1;
 
     /** Rule index */
-    const RULE_TARGET = self::RULE_NAME + 1;
+    public const RULE_TARGET = self::RULE_NAME + 1;
 
     /** Rule index */
-    const RULE_CONDITION = self::RULE_TARGET + 1;
+    public const RULE_CONDITION = self::RULE_TARGET + 1;
 
     /** Rule index */
-    const RULE_EFFECT = self::RULE_CONDITION + 1;
+    public const RULE_EFFECT = self::RULE_CONDITION + 1;
 
     /** Rule index */
-    const RULE_OBLIGATIONS = self::RULE_EFFECT + 1;
+    public const RULE_OBLIGATIONS = self::RULE_EFFECT + 1;
 
     /** Rule index */
-    const RULE_ADVICE = self::RULE_OBLIGATIONS + 1;
+    public const RULE_ADVICE = self::RULE_OBLIGATIONS + 1;
 
     /** Policy index */
-    const POLICY_NAME = self::TYPE + 1;
+    public const POLICY_NAME = self::TYPE + 1;
 
     /** Policy index */
-    const POLICY_TARGET = self::POLICY_NAME + 1;
+    public const POLICY_TARGET = self::POLICY_NAME + 1;
 
     /** Policy index */
-    const POLICY_OBLIGATIONS = self::POLICY_TARGET + 1;
+    public const POLICY_OBLIGATIONS = self::POLICY_TARGET + 1;
 
     /** Policy index */
-    const POLICY_ADVICE = self::POLICY_OBLIGATIONS + 1;
+    public const POLICY_ADVICE = self::POLICY_OBLIGATIONS + 1;
 
     /** Policy index */
-    const POLICY_RULES = self::POLICY_ADVICE + 1;
+    public const POLICY_RULES = self::POLICY_ADVICE + 1;
 
     /** Policy index */
-    const POLICY_SET_NAME = self::TYPE + 1;
+    public const POLICY_SET_NAME = self::TYPE + 1;
 
     /** Policy index */
-    const POLICY_SET_TARGET = self::POLICY_SET_NAME + 1;
+    public const POLICY_SET_TARGET = self::POLICY_SET_NAME + 1;
 
     /** Policy index */
-    const POLICY_SET_OBLIGATIONS = self::POLICY_SET_TARGET + 1;
+    public const POLICY_SET_OBLIGATIONS = self::POLICY_SET_TARGET + 1;
 
     /** Policy index */
-    const POLICY_SET_ADVICE = self::POLICY_SET_OBLIGATIONS + 1;
+    public const POLICY_SET_ADVICE = self::POLICY_SET_OBLIGATIONS + 1;
 
     /** Policy index */
-    const POLICY_SET_CHILDREN = self::POLICY_SET_ADVICE + 1;
+    public const POLICY_SET_CHILDREN = self::POLICY_SET_ADVICE + 1;
 
     /** Rules index */
-    const RULES_DATA = self::TYPE + 1;
+    public const RULES_DATA = self::TYPE + 1;
 
     /** Rules index */
-    const POLICIES_AND_SETS_DATA = self::TYPE + 1;
+    public const POLICIES_AND_SETS_DATA = self::TYPE + 1;
 
     /**
      * @param RuleInterface $rule
-     *
      * @return array
      */
     public static function encodeRule(RuleInterface $rule): array
     {
-        $result = [
-            static::TYPE             => static::TYPE_RULE,
-            static::RULE_NAME        => $rule->getName(),
-            static::RULE_TARGET      => static::encodeTarget($rule->getTarget()),
-            static::RULE_CONDITION   => static::serializeMethod($rule->getCondition()),
-            static::RULE_EFFECT      => static::serializeMethod($rule->effect()),
+        return [
+            static::TYPE => static::TYPE_RULE,
+            static::RULE_NAME => $rule->getName(),
+            static::RULE_TARGET => static::encodeTarget($rule->getTarget()),
+            static::RULE_CONDITION => static::serializeMethod($rule->getCondition()),
+            static::RULE_EFFECT => static::serializeMethod($rule->effect()),
             static::RULE_OBLIGATIONS => static::encodeObligations($rule->getObligations()),
-            static::RULE_ADVICE      => static::encodeAdvice($rule->getAdvice()),
+            static::RULE_ADVICE => static::encodeAdvice($rule->getAdvice()),
         ];
-
-        return $result;
     }
 
     /**
      * @param PolicyInterface $policy
-     *
      * @return array
      */
     public static function encodePolicy(PolicyInterface $policy): array
     {
-        $result = [
-            static::TYPE               => static::TYPE_POLICY,
-            static::POLICY_NAME        => $policy->getName(),
-            static::POLICY_TARGET      => static::encodeTarget($policy->getTarget()),
+        return [
+            static::TYPE => static::TYPE_POLICY,
+            static::POLICY_NAME => $policy->getName(),
+            static::POLICY_TARGET => static::encodeTarget($policy->getTarget()),
             static::POLICY_OBLIGATIONS => static::encodeObligations($policy->getObligations()),
-            static::POLICY_ADVICE      => static::encodeAdvice($policy->getAdvice()),
-            static::POLICY_RULES       => static::encodeRules($policy->getCombiningAlgorithm(), $policy->getRules()),
+            static::POLICY_ADVICE => static::encodeAdvice($policy->getAdvice()),
+            static::POLICY_RULES => static::encodeRules($policy->getCombiningAlgorithm(), $policy->getRules()),
         ];
-
-        return $result;
     }
 
     /**
      * @param PolicySetInterface $set
-     *
      * @return array
      */
     public static function encodePolicySet(PolicySetInterface $set): array
     {
-        $algorithm       = $set->getCombiningAlgorithm();
+        $algorithm = $set->getCombiningAlgorithm();
         $policiesAndSets = $set->getPoliciesAndSets();
-        $result          = [
-            static::TYPE                   => static::TYPE_POLICY_SET,
-            static::POLICY_SET_NAME        => $set->getName(),
-            static::POLICY_SET_TARGET      => static::encodeTarget($set->getTarget()),
+        return [
+            static::TYPE => static::TYPE_POLICY_SET,
+            static::POLICY_SET_NAME => $set->getName(),
+            static::POLICY_SET_TARGET => static::encodeTarget($set->getTarget()),
             static::POLICY_SET_OBLIGATIONS => static::encodeObligations($set->getObligations()),
-            static::POLICY_SET_ADVICE      => static::encodeAdvice($set->getAdvice()),
-            static::POLICY_SET_CHILDREN    => static::serializePoliciesAndSets($algorithm, $policiesAndSets),
+            static::POLICY_SET_ADVICE => static::encodeAdvice($set->getAdvice()),
+            static::POLICY_SET_CHILDREN => static::serializePoliciesAndSets($algorithm, $policiesAndSets),
         ];
-
-        return $result;
     }
 
     /**
      * @param array $encoded
-     *
      * @return int
      */
     public static function getType(array $encoded): int
@@ -197,7 +185,6 @@ class Encoder
 
     /**
      * @param array $encoded
-     *
      * @return bool
      */
     public static function isTarget(array $encoded): bool
@@ -207,7 +194,6 @@ class Encoder
 
     /**
      * @param array $encoded
-     *
      * @return bool
      */
     public static function isRule(array $encoded): bool
@@ -217,7 +203,6 @@ class Encoder
 
     /**
      * @param array $encoded
-     *
      * @return bool
      */
     public static function isPolicy(array $encoded): bool
@@ -227,7 +212,6 @@ class Encoder
 
     /**
      * @param array $encoded
-     *
      * @return bool
      */
     public static function isPolicySet(array $encoded): bool
@@ -241,7 +225,6 @@ class Encoder
 
     /**
      * @param array $encodedTarget
-     *
      * @return string|null
      */
     public static function targetName(array $encodedTarget): ?string
@@ -253,7 +236,6 @@ class Encoder
 
     /**
      * @param array $encodedTarget
-     *
      * @return array|null
      */
     public static function targetAnyOfs(array $encodedTarget): ?array
@@ -265,7 +247,6 @@ class Encoder
 
     /**
      * @param array $encodedRule
-     *
      * @return string
      */
     public static function ruleName(array $encodedRule): string
@@ -277,7 +258,6 @@ class Encoder
 
     /**
      * @param array $encodedRule
-     *
      * @return array
      */
     public static function ruleTarget(array $encodedRule): array
@@ -289,7 +269,6 @@ class Encoder
 
     /**
      * @param array $encodedRule
-     *
      * @return array|null
      */
     public static function ruleEffect(array $encodedRule): ?array
@@ -301,7 +280,6 @@ class Encoder
 
     /**
      * @param array $encodedRule
-     *
      * @return callable|null
      */
     public static function ruleCondition(array $encodedRule): ?callable
@@ -313,7 +291,6 @@ class Encoder
 
     /**
      * @param array $encodedRule
-     *
      * @return callable[]
      */
     public static function ruleObligations(array $encodedRule): array
@@ -325,7 +302,6 @@ class Encoder
 
     /**
      * @param array $encodedRule
-     *
      * @return callable[]
      */
     public static function ruleAdvice(array $encodedRule): array
@@ -337,7 +313,6 @@ class Encoder
 
     /**
      * @param array $encodedPolicy
-     *
      * @return string|null
      */
     public static function policyName(array $encodedPolicy): ?string
@@ -349,7 +324,6 @@ class Encoder
 
     /**
      * @param array $encodedPolicy
-     *
      * @return array
      */
     public static function policyTarget(array $encodedPolicy): array
@@ -361,7 +335,6 @@ class Encoder
 
     /**
      * @param array $encodedPolicy
-     *
      * @return callable[]
      */
     public static function policyObligations(array $encodedPolicy): array
@@ -373,7 +346,6 @@ class Encoder
 
     /**
      * @param array $encodedPolicy
-     *
      * @return callable[]
      */
     public static function policyAdvice(array $encodedPolicy): array
@@ -385,7 +357,6 @@ class Encoder
 
     /**
      * @param array $encodedPolicy
-     *
      * @return array
      */
     public static function policyRules(array $encodedPolicy): array
@@ -397,7 +368,6 @@ class Encoder
 
     /**
      * @param array $encodedPolicySet
-     *
      * @return string
      */
     public static function policySetName(array $encodedPolicySet): string
@@ -409,7 +379,6 @@ class Encoder
 
     /**
      * @param array $encodedPolicySet
-     *
      * @return array
      */
     public static function policySetTarget(array $encodedPolicySet): array
@@ -421,7 +390,6 @@ class Encoder
 
     /**
      * @param array $encodedPolicySet
-     *
      * @return callable[]
      */
     public static function policySetObligations(array $encodedPolicySet): array
@@ -433,7 +401,6 @@ class Encoder
 
     /**
      * @param array $encodedPolicySet
-     *
      * @return callable[]
      */
     public static function policySetAdvice(array $encodedPolicySet): array
@@ -445,7 +412,6 @@ class Encoder
 
     /**
      * @param array $encodedPolicySet
-     *
      * @return array
      */
     public static function policySetChildren(array $encodedPolicySet): array
@@ -457,7 +423,6 @@ class Encoder
 
     /**
      * @param array $rules
-     *
      * @return array
      */
     public static function rulesData(array $rules): array
@@ -469,7 +434,6 @@ class Encoder
 
     /**
      * @param array $policesAndSets
-     *
      * @return array
      */
     public static function policiesAndSetsData(array $policesAndSets): array
@@ -480,34 +444,27 @@ class Encoder
     }
 
     /**
-     * @param int   $evaluation
+     * @param int $evaluation
      * @param array $obligations
-     *
      * @return array
      */
     public static function getFulfillObligations(int $evaluation, array $obligations): array
     {
-        $result = array_key_exists($evaluation, $obligations) === true ? $obligations[$evaluation] : [];
-
-        return $result;
+        return array_key_exists($evaluation, $obligations) === true ? $obligations[$evaluation] : [];
     }
 
     /**
-     * @param int   $evaluation
+     * @param int $evaluation
      * @param array $advice
-     *
      * @return array
      */
     public static function getAppliedAdvice(int $evaluation, array $advice): array
     {
-        $result = array_key_exists($evaluation, $advice) === true ? $advice[$evaluation] : [];
-
-        return $result;
+        return array_key_exists($evaluation, $advice) === true ? $advice[$evaluation] : [];
     }
 
     /**
      * @param MethodInterface|null $method
-     *
      * @return callable|null
      */
     private static function serializeMethod(MethodInterface $method = null): ?callable
@@ -517,7 +474,6 @@ class Encoder
 
     /**
      * @param ObligationInterface[] $obligations
-     *
      * @return array
      */
     private static function encodeObligations(array $obligations): array
@@ -533,7 +489,6 @@ class Encoder
 
     /**
      * @param AdviceInterface[] $advice
-     *
      * @return array
      */
     private static function encodeAdvice(array $advice): array
@@ -549,31 +504,28 @@ class Encoder
 
     /**
      * @param RuleCombiningAlgorithmInterface $algorithm
-     * @param array                           $rules
-     *
+     * @param array $rules
      * @return array
      */
     private static function encodeRules(RuleCombiningAlgorithmInterface $algorithm, array $rules): array
     {
         return [
-            static::TYPE       => static::TYPE_RULES,
+            static::TYPE => static::TYPE_RULES,
             static::RULES_DATA => $algorithm->optimize($rules)
         ];
     }
 
     /**
      * @param PolicyCombiningAlgorithmInterface $algorithm
-     * @param array                             $policiesAndSets
-     *
+     * @param array $policiesAndSets
      * @return array
      */
     private static function serializePoliciesAndSets(
         PolicyCombiningAlgorithmInterface $algorithm,
         array $policiesAndSets
-    ): array
-    {
+    ): array {
         return [
-            static::TYPE                   => static::TYPE_POLICIES_AND_SETS,
+            static::TYPE => static::TYPE_POLICIES_AND_SETS,
             static::POLICIES_AND_SETS_DATA => $algorithm->optimize($policiesAndSets)
         ];
     }

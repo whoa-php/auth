@@ -23,6 +23,7 @@ namespace Whoa\Auth\Authorization\PolicyAdministration;
 
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\AllOfInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\AnyOfInterface;
+
 use function assert;
 
 /**
@@ -33,7 +34,7 @@ class AnyOf implements AnyOfInterface
     /**
      * @var AllOfInterface[]
      */
-    private $allOffs;
+    private array $allOffs;
 
     /**
      * @param AllOfInterface[] $allOffs

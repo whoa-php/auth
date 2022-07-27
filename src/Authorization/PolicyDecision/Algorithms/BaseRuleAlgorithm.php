@@ -28,6 +28,7 @@ use Whoa\Auth\Contracts\Authorization\PolicyAdministration\TargetMatchEnum;
 use Whoa\Auth\Contracts\Authorization\PolicyInformation\ContextInterface;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
+
 use function assert;
 use function count;
 use function is_array;
@@ -41,26 +42,21 @@ abstract class BaseRuleAlgorithm extends BaseAlgorithm implements RuleCombiningA
 {
     /**
      * @param array $targets
-     *
      * @return array
      */
     abstract protected function optimizeTargets(array $targets): array;
 
     /**
-     * @param ContextInterface     $context
-     * @param array                $rulesData
+     * @param ContextInterface $context
+     * @param array $rulesData
      * @param LoggerInterface|null $logger
-     *
      * @return array
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     public static function callRuleAlgorithm(
         ContextInterface $context,
         array $rulesData,
         LoggerInterface $logger = null
-    ): array
-    {
+    ): array {
         return static::callAlgorithm(
             static::getCallable($rulesData),
             $context,
@@ -72,77 +68,68 @@ abstract class BaseRuleAlgorithm extends BaseAlgorithm implements RuleCombiningA
 
     /**
      * @inheritdoc
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     public function optimize(array $rules): array
     {
         assert(empty($rules) === false);
 
-        $ruleId       = 0;
-        $rawTargets   = [];
+        $ruleId = 0;
+        $rawTargets = [];
         $encodedRules = [];
         foreach ($rules as $rule) {
             /** @var RuleInterface $rule */
-            $rawTargets[$ruleId]   = $rule->getTarget();
+            $rawTargets[$ruleId] = $rule->getTarget();
             $encodedRules[$ruleId] = Encoder::encodeRule($rule);
             $ruleId++;
         }
 
-        $callable         = static::METHOD;
+        $callable = static::METHOD;
         $optimizedTargets = $this->optimizeTargets($rawTargets);
 
         /** @var callable|array $callable */
-        assert($callable !== null && is_array($callable) === true &&
+        assert(
+            $callable !== null && is_array($callable) === true &&
             is_callable($callable) === true && count($callable) === 2 &&
-            is_string($callable[0]) === true && is_string($callable[1]) === true);
+            is_string($callable[0]) === true && is_string($callable[1]) === true
+        );
 
         return [
-            static::INDEX_TARGETS  => $optimizedTargets,
-            static::INDEX_RULES    => $encodedRules,
+            static::INDEX_TARGETS => $optimizedTargets,
+            static::INDEX_RULES => $encodedRules,
             static::INDEX_CALLABLE => $callable,
         ];
     }
 
     /**
      * @inheritdoc
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     public static function evaluateItem(
         ContextInterface $context,
         int $match,
         array $encodedItem,
         ?LoggerInterface $logger
-    ): array
-    {
+    ): array {
         return static::evaluateRule($context, $match, $encodedItem, $logger);
     }
 
     /**
-     * @param ContextInterface     $context
-     * @param int                  $match
-     * @param array                $encodedRule
+     * @param ContextInterface $context
+     * @param int $match
+     * @param array $encodedRule
      * @param LoggerInterface|null $logger
-     *
      * @return array
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
-     * @SuppressWarnings(PHPMD.ElseExpression)
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     private static function evaluateRule(
         ContextInterface $context,
         int $match,
         array $encodedRule,
         LoggerInterface $logger = null
-    ): array
-    {
+    ): array {
         assert(Encoder::isRule($encodedRule));
 
         $ruleName = null;
         if ($logger !== null) {
-            $ruleName  = Encoder::ruleName($encodedRule);
+            $ruleName = Encoder::ruleName($encodedRule);
             $matchName = TargetMatchEnum::toString($match);
             $logger->debug("Rule '$ruleName' evaluation started for match '$matchName'.");
         }
@@ -150,7 +137,7 @@ abstract class BaseRuleAlgorithm extends BaseAlgorithm implements RuleCombiningA
         /** @see http://docs.oasis-open.org/xacml/3.0/xacml-3.0-core-spec-os-en.html #7.11 (table 4) */
 
         if ($match === TargetMatchEnum::INDETERMINATE) {
-            $isPermit   = static::evaluateIsPermit($context, $encodedRule);
+            $isPermit = static::evaluateIsPermit($context, $encodedRule);
             $evaluation = $isPermit === true ?
                 EvaluationEnum::INDETERMINATE_PERMIT : EvaluationEnum::INDETERMINATE_DENY;
         } elseif ($match === TargetMatchEnum::NO_TARGET || $match === TargetMatchEnum::MATCH) {
@@ -185,11 +172,8 @@ abstract class BaseRuleAlgorithm extends BaseAlgorithm implements RuleCombiningA
 
     /**
      * @param ContextInterface $context
-     * @param array            $encodedRule
-     *
+     * @param array $encodedRule
      * @return bool
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     private static function evaluateIsPermit(ContextInterface $context, array $encodedRule): bool
     {
@@ -206,7 +190,6 @@ abstract class BaseRuleAlgorithm extends BaseAlgorithm implements RuleCombiningA
 
     /**
      * @param array $rulesData
-     *
      * @return array
      */
     private static function getTargets(array $rulesData): array
@@ -216,7 +199,6 @@ abstract class BaseRuleAlgorithm extends BaseAlgorithm implements RuleCombiningA
 
     /**
      * @param array $rulesData
-     *
      * @return array
      */
     private static function getRules(array $rulesData): array
@@ -226,10 +208,9 @@ abstract class BaseRuleAlgorithm extends BaseAlgorithm implements RuleCombiningA
 
     /**
      * @param array $rulesData
-     *
      * @return callable
      */
-    private static function getCallable(array $rulesData)
+    private static function getCallable(array $rulesData): callable
     {
         return $rulesData[self::INDEX_CALLABLE];
     }

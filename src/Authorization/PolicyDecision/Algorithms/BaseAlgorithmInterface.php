@@ -27,16 +27,14 @@ use Psr\Log\LoggerInterface;
 
 /**
  * This interface is only needed for declaring abstract/virtual static methods which is not allowed on class level.
- *
  * @package Whoa\Auth
  */
 interface BaseAlgorithmInterface
 {
     /**
-     * @param ContextInterface     $context
-     * @param array                $optimizedTargets
+     * @param ContextInterface $context
+     * @param array $optimizedTargets
      * @param LoggerInterface|null $logger
-     *
      * @return Generator
      */
     public static function evaluateTargets(
@@ -46,11 +44,10 @@ interface BaseAlgorithmInterface
     ): Generator;
 
     /**
-     * @param ContextInterface     $context
-     * @param int                  $match
-     * @param array                $encodedItem
+     * @param ContextInterface $context
+     * @param int $match
+     * @param array $encodedItem
      * @param LoggerInterface|null $logger
-     *
      * @return array
      */
     public static function evaluateItem(

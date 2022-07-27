@@ -32,12 +32,12 @@ class PoliciesOrSetsFirstApplicable extends BasePolicyOrSetAlgorithm
     use DefaultTargetSerializeTrait;
 
     /** @inheritdoc */
-    const METHOD = [self::class, 'evaluate'];
+    public const METHOD = [self::class, 'evaluate'];
 
     /**
-     * @param ContextInterface     $context
-     * @param array                $optimizedTargets
-     * @param array                $encPoliciesOrSets
+     * @param ContextInterface $context
+     * @param array $optimizedTargets
+     * @param array $encPoliciesOrSets
      * @param LoggerInterface|null $logger
      *
      * @return array
@@ -47,8 +47,7 @@ class PoliciesOrSetsFirstApplicable extends BasePolicyOrSetAlgorithm
         array $optimizedTargets,
         array $encPoliciesOrSets,
         ?LoggerInterface $logger
-    ): array
-    {
+    ): array {
         return self::evaluateFirstApplicable($context, $optimizedTargets, $encPoliciesOrSets, $logger);
     }
 }

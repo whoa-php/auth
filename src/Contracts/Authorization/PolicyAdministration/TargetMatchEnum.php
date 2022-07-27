@@ -29,16 +29,16 @@ abstract class TargetMatchEnum
     /** @see http://docs.oasis-open.org/xacml/3.0/xacml-3.0-core-spec-os-en.html #7.11 (table 4) */
 
     /** Combine result */
-    const MATCH = 0;
+    public const MATCH = 0;
 
     /** Combine result */
-    const NOT_MATCH = self::MATCH + 1;
+    public const NOT_MATCH = self::MATCH + 1;
 
     /** Combine result */
-    const NO_TARGET = self::NOT_MATCH + 1;
+    public const NO_TARGET = self::NOT_MATCH + 1;
 
     /** Combine result */
-    const INDETERMINATE = self::NO_TARGET + 1;
+    public const INDETERMINATE = self::NO_TARGET + 1;
 
     /**
      * @param int $value

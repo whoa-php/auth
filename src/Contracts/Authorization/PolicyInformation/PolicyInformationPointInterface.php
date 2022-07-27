@@ -30,7 +30,6 @@ interface PolicyInformationPointInterface
 {
     /**
      * @param RequestInterface $request
-     *
      * @return ContextInterface
      */
     public function createContext(RequestInterface $request): ContextInterface;

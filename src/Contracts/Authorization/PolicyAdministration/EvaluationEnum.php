@@ -29,29 +29,28 @@ abstract class EvaluationEnum
     /** @see http://docs.oasis-open.org/xacml/3.0/xacml-3.0-core-spec-os-en.html#_Toc325047187 */
 
     /** Combine result */
-    const PERMIT = (1 << 0);
+    public const PERMIT = (1 << 0);
 
     /** Combine result */
-    const DENY = (1 << 1);
+    public const DENY = (1 << 1);
 
     /** Combine result */
-    const INDETERMINATE = (1 << 2);
+    public const INDETERMINATE = (1 << 2);
 
     /** Combine result */
-    const NOT_APPLICABLE = (1 << 3);
+    public const NOT_APPLICABLE = (1 << 3);
 
     /** Combine result */
-    const INDETERMINATE_PERMIT = self::INDETERMINATE | self::PERMIT;
+    public const INDETERMINATE_PERMIT = self::INDETERMINATE | self::PERMIT;
 
     /** Combine result */
-    const INDETERMINATE_DENY = self::INDETERMINATE | self::DENY;
+    public const INDETERMINATE_DENY = self::INDETERMINATE | self::DENY;
 
     /** Combine result */
-    const INDETERMINATE_DENY_OR_PERMIT = self::INDETERMINATE | self::DENY | self::PERMIT;
+    public const INDETERMINATE_DENY_OR_PERMIT = self::INDETERMINATE | self::DENY | self::PERMIT;
 
     /**
      * @param int $value
-     *
      * @return string
      */
     public static function toString(int $value): string

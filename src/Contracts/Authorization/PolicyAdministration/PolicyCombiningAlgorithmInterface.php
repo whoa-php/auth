@@ -27,17 +27,16 @@ namespace Whoa\Auth\Contracts\Authorization\PolicyAdministration;
 interface PolicyCombiningAlgorithmInterface
 {
     /** Optimization data index */
-    const INDEX_TARGETS = 0;
+    public const INDEX_TARGETS = 0;
 
     /** Optimization data index */
-    const INDEX_POLICIES_AND_SETS = self::INDEX_TARGETS + 1;
+    public const INDEX_POLICIES_AND_SETS = self::INDEX_TARGETS + 1;
 
     /** Optimization data index */
-    const INDEX_CALLABLE = self::INDEX_POLICIES_AND_SETS + 1;
+    public const INDEX_CALLABLE = self::INDEX_POLICIES_AND_SETS + 1;
 
     /**
      * @param PolicyInterface[]|PolicySetInterface[] $policiesAndSets
-     *
      * @return array
      */
     public function optimize(array $policiesAndSets): array;

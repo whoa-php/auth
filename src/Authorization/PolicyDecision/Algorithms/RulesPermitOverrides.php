@@ -1,9 +1,8 @@
-<?php declare(strict_types=1);
-
-namespace Whoa\Auth\Authorization\PolicyDecision\Algorithms;
+<?php
 
 /**
  * Copyright 2015-2019 info@neomerx.com
+ * Modification Copyright 2021-2022 info@whoaphp.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +17,10 @@ namespace Whoa\Auth\Authorization\PolicyDecision\Algorithms;
  * limitations under the License.
  */
 
+declare(strict_types=1);
+
+namespace Whoa\Auth\Authorization\PolicyDecision\Algorithms;
+
 use Whoa\Auth\Contracts\Authorization\PolicyInformation\ContextInterface;
 use Psr\Log\LoggerInterface;
 
@@ -29,14 +32,13 @@ class RulesPermitOverrides extends BaseRuleAlgorithm
     use DefaultTargetSerializeTrait;
 
     /** @inheritdoc */
-    const METHOD = [self::class, 'evaluate'];
+    public const METHOD = [self::class, 'evaluate'];
 
     /**
-     * @param ContextInterface     $context
-     * @param array                $optimizedTargets
-     * @param array                $serializedRules
+     * @param ContextInterface $context
+     * @param array $optimizedTargets
+     * @param array $serializedRules
      * @param LoggerInterface|null $logger
-     *
      * @return array
      */
     public static function evaluate(

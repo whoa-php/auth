@@ -36,7 +36,7 @@ class PolicyInformationPoint implements PolicyInformationPointInterface
     /**
      * @var array
      */
-    private $contextDefinitions;
+    private array $contextDefinitions;
 
     /**
      * @param array $contextDefinitions

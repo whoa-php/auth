@@ -28,6 +28,7 @@ use Whoa\Auth\Contracts\Authorization\PolicyEnforcement\RequestInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyInformation\PolicyInformationPointInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+
 use function call_user_func;
 
 /**
@@ -40,21 +41,21 @@ class PolicyEnforcementPoint implements PolicyEnforcementPointInterface, LoggerA
     /**
      * @var PolicyInformationPointInterface
      */
-    private $pip;
+    private PolicyInformationPointInterface $pip;
 
     /**
      * @var PolicyDecisionPointInterface
      */
-    private $pdp;
+    private PolicyDecisionPointInterface $pdp;
 
     /**
      * @var bool
      */
-    private $isExecuteAdvice = true;
+    private bool $isExecuteAdvice = true;
 
     /**
      * @param PolicyInformationPointInterface $pip
-     * @param PolicyDecisionPointInterface    $pdp
+     * @param PolicyDecisionPointInterface $pdp
      */
     public function __construct(PolicyInformationPointInterface $pip, PolicyDecisionPointInterface $pdp)
     {
@@ -135,7 +136,6 @@ class PolicyEnforcementPoint implements PolicyEnforcementPointInterface, LoggerA
 
     /**
      * @param int $evaluation
-     *
      * @return bool
      */
     protected function interpretEvaluation(int $evaluation): bool

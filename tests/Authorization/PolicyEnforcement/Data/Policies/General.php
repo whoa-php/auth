@@ -21,6 +21,8 @@ declare(strict_types=1);
 
 namespace Whoa\Tests\Auth\Authorization\PolicyEnforcement\Data\Policies;
 
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Whoa\Auth\Authorization\PolicyAdministration\AllOf;
 use Whoa\Auth\Authorization\PolicyAdministration\AnyOf;
 use Whoa\Auth\Authorization\PolicyAdministration\Rule;
@@ -29,6 +31,7 @@ use Whoa\Auth\Contracts\Authorization\PolicyAdministration\RuleInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\TargetInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyInformation\ContextInterface;
 use Whoa\Tests\Auth\Authorization\PolicyEnforcement\Data\ContextProperties;
+use Whoa\Tests\Auth\Authorization\PolicyEnforcement\Data\RequestProperties;
 
 /**
  * @package Whoa\Tests\Auth
@@ -36,37 +39,36 @@ use Whoa\Tests\Auth\Authorization\PolicyEnforcement\Data\ContextProperties;
 abstract class General
 {
     /** Operation identity */
-    const OPERATION_CREATE = 'create';
+    public const OPERATION_CREATE = 'create';
 
     /** Operation identity */
-    const OPERATION_READ = 'read';
+    public const OPERATION_READ = 'read';
 
     /** Operation identity */
-    const OPERATION_UPDATE = 'update';
+    public const OPERATION_UPDATE = 'update';
 
     /** Operation identity */
-    const OPERATION_DELETE = 'delete';
+    public const OPERATION_DELETE = 'delete';
 
     /** Operation identity */
-    const OPERATION_INDEX = 'index';
+    public const OPERATION_INDEX = 'index';
 
     /**
      * @param ContextInterface $context
      *
      * @return bool
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
-    public static function isAdmin(ContextInterface $context)
+    public static function isAdmin(ContextInterface $context): bool
     {
         $curUserRole = $context->get(ContextProperties::CONTEXT_CURRENT_USER_ROLE);
-        $result      = $curUserRole === 'admin';
-
-        return $result;
+        return $curUserRole === 'admin';
     }
 
     /**
-     * @param string|int       $key
+     * @param string|int $key
      * @param string|int|float $value (any scalar)
-     *
      * @return TargetInterface
      */
     protected static function target($key, $value)
@@ -75,9 +77,7 @@ abstract class General
     }
 
     /**
-     *
      * @param array $properties
-     *
      * @return TargetInterface
      */
     protected static function targetMulti(array $properties)
@@ -98,7 +98,7 @@ abstract class General
      */
     protected static function targetOperationRead()
     {
-        return static::target(ContextProperties::REQUEST_OPERATION, static::OPERATION_READ);
+        return static::target(RequestProperties::REQUEST_OPERATION, static::OPERATION_READ);
     }
 
     /**
@@ -106,7 +106,7 @@ abstract class General
      */
     protected static function targetOperationUpdate()
     {
-        return static::target(ContextProperties::REQUEST_OPERATION, static::OPERATION_UPDATE);
+        return static::target(RequestProperties::REQUEST_OPERATION, static::OPERATION_UPDATE);
     }
 
     /**
@@ -114,7 +114,7 @@ abstract class General
      */
     protected static function targetOperationDelete()
     {
-        return static::target(ContextProperties::REQUEST_OPERATION, static::OPERATION_DELETE);
+        return static::target(RequestProperties::REQUEST_OPERATION, static::OPERATION_DELETE);
     }
 
     /**
@@ -122,13 +122,13 @@ abstract class General
      */
     protected static function targetOperationIndex()
     {
-        return static::target(ContextProperties::REQUEST_OPERATION, static::OPERATION_INDEX);
+        return static::target(RequestProperties::REQUEST_OPERATION, static::OPERATION_INDEX);
     }
 
     /**
      * @return RuleInterface
      */
-    protected static function rulePermit()
+    protected static function rulePermit(): RuleInterface
     {
         return (new Rule())->setName('permit');
     }

@@ -28,7 +28,6 @@ interface PolicyEnforcementPointInterface
 {
     /**
      * @param RequestInterface $request
-     *
      * @return bool
      */
     public function authorize(RequestInterface $request): bool;

@@ -46,12 +46,12 @@ class PolicySwitchOptimizationTest extends TestCase
     /**
      * @var bool
      */
-    public static $obligationCalled = false;
+    public static bool $obligationCalled = false;
 
     /**
      * @var bool
      */
-    public static $adviceCalled = false;
+    public static bool $adviceCalled = false;
 
     /**
      * @var resource
@@ -66,17 +66,17 @@ class PolicySwitchOptimizationTest extends TestCase
     /**
      * @var int|null
      */
-    private $currentUserId;
+    private ?int $currentUserId;
 
     /**
      * @var string|null
      */
-    private $currentUserRole;
+    private ?string $currentUserRole;
 
     /**
      * @var bool
      */
-    private $isWorkTime;
+    private bool $isWorkTime;
 
     /**
      * Test authorization of operation without any additional parameters (e.g. 'send message').
@@ -84,14 +84,14 @@ class PolicySwitchOptimizationTest extends TestCase
     public function testAuthorizeOperationSuccess()
     {
         // set up environment variables (current user is not signed in and currently is work time)
-        $this->currentUserId   = null;
+        $this->currentUserId = null;
         $this->currentUserRole = null;
-        $this->isWorkTime      = true;
-        $policyEnforcement     = $this->createPolicyEnforcementPoint();
+        $this->isWorkTime = true;
+        $policyEnforcement = $this->createPolicyEnforcementPoint();
 
         // send authorization request
         $authRequest = new Request([
-            RequestProperties::REQUEST_OPERATION     => Posts::OPERATION_INDEX,
+            RequestProperties::REQUEST_OPERATION => Data\Policies\General::OPERATION_INDEX,
             RequestProperties::REQUEST_RESOURCE_TYPE => Posts::RESOURCE_TYPE,
         ]);
         $this->assertTrue($policyEnforcement->authorize($authRequest));
@@ -105,7 +105,8 @@ class PolicySwitchOptimizationTest extends TestCase
         // you have to check the log messages and make sure it was executed as switch:
         // 1) First step was checking Post rules and no rules for other resources were checked.
         // 2) Second step was checking `index` and no other Post rules were checked.
-        $loggedActions = explode(PHP_EOL, $this->getLogs());
+        // $loggedActions = explode(PHP_EOL, $this->getLogs());
+        $loggedActions = preg_split('/\r\n|\r|\n/', $this->getLogs());
         $this->assertCount(10, $loggedActions);
     }
 
@@ -115,14 +116,14 @@ class PolicySwitchOptimizationTest extends TestCase
     public function testAuthorizeOperationOnResourceTypeFail()
     {
         // set up environment variables (current user is not signed in and currently is work time)
-        $this->currentUserId   = null;
+        $this->currentUserId = null;
         $this->currentUserRole = null;
-        $this->isWorkTime      = true;
-        $policyEnforcement     = $this->createPolicyEnforcementPoint();
+        $this->isWorkTime = true;
+        $policyEnforcement = $this->createPolicyEnforcementPoint();
 
         // send authorization request
         $authRequest = new Request([
-            RequestProperties::REQUEST_OPERATION     => Posts::OPERATION_CREATE,
+            RequestProperties::REQUEST_OPERATION => Data\Policies\General::OPERATION_CREATE,
             RequestProperties::REQUEST_RESOURCE_TYPE => Posts::RESOURCE_TYPE,
         ]);
 
@@ -134,12 +135,11 @@ class PolicySwitchOptimizationTest extends TestCase
 
     /**
      * @param ContextInterface $context
-     *
      * @return void
      */
     public static function markObligationAsCalled(ContextInterface $context)
     {
-        // cant be null but to avoid 'not used variable' warning
+        // can't be null but to avoid 'not used variable' warning
         static::assertNotNull($context);
 
         static::$obligationCalled = true;
@@ -147,12 +147,11 @@ class PolicySwitchOptimizationTest extends TestCase
 
     /**
      * @param ContextInterface $context
-     *
      * @return void
      */
     public static function markAdviceAsCalled(ContextInterface $context)
     {
-        // cant be null but to avoid 'not used variable' warning
+        // can't be null but to avoid 'not used variable' warning
         static::assertNotNull($context);
 
         static::$adviceCalled = true;
@@ -160,7 +159,6 @@ class PolicySwitchOptimizationTest extends TestCase
 
     /**
      * @inheritdoc
-     *
      * @throws Exception
      */
     protected function setUp(): void
@@ -168,14 +166,14 @@ class PolicySwitchOptimizationTest extends TestCase
         parent::setUp();
 
         $this->logStream = fopen('php://memory', 'rw');
-        $this->logger    = new Logger('auth', [new StreamHandler($this->getLogStream())]);
+        $this->logger = new Logger('auth', [new StreamHandler($this->getLogStream())]);
 
-        $this->currentUserId   = null;
+        $this->currentUserId = null;
         $this->currentUserRole = null;
-        $this->isWorkTime      = false;
+        $this->isWorkTime = false;
 
         static::$obligationCalled = false;
-        static::$adviceCalled     = false;
+        static::$adviceCalled = false;
     }
 
     /**
@@ -199,7 +197,7 @@ class PolicySwitchOptimizationTest extends TestCase
     /**
      * @return LoggerInterface
      */
-    protected function getLogger()
+    protected function getLogger(): LoggerInterface
     {
         return $this->logger;
     }
@@ -207,12 +205,10 @@ class PolicySwitchOptimizationTest extends TestCase
     /**
      * @return string
      */
-    protected function getLogs()
+    protected function getLogs(): string
     {
         rewind($this->getLogStream());
-        $logs = stream_get_contents($this->getLogStream());
-
-        return $logs;
+        return stream_get_contents($this->getLogStream());
     }
 
     /**
@@ -242,26 +238,24 @@ class PolicySwitchOptimizationTest extends TestCase
      */
     private function createPolicyInformationPoint()
     {
-        // Typically values are taken from application container, system environment and
-        // external systems but not from constructor parameters. However it's fine for testing purposes.
+        // Typically, values are taken from application container, system environment and
+        // external systems but not from constructor parameters. However, it's fine for testing purposes.
         // Both scalar values and methods/closures are supported.
-        $pip = new PolicyInformationPoint($this->getContextDefinitions());
-
-        return $pip;
+        return new PolicyInformationPoint($this->getContextDefinitions());
     }
 
     /**
      * @return array
      */
-    private function getContextDefinitions()
+    private function getContextDefinitions(): array
     {
         return [
-            LoggerInterface::class                       => $this->getLogger(),
-            ContextProperties::CONTEXT_CURRENT_USER_ID   => $this->currentUserId,
+            LoggerInterface::class => $this->getLogger(),
+            ContextProperties::CONTEXT_CURRENT_USER_ID => $this->currentUserId,
             ContextProperties::CONTEXT_CURRENT_USER_ROLE => $this->currentUserRole,
             ContextProperties::CONTEXT_USER_IS_SIGNED_IN => $this->currentUserId !== null &&
                 $this->currentUserRole !== null,
-            ContextProperties::CONTEXT_IS_WORK_TIME      => function () {
+            ContextProperties::CONTEXT_IS_WORK_TIME => function () {
                 return $this->isWorkTime;
             },
         ];

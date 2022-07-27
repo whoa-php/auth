@@ -26,6 +26,7 @@ use Whoa\Auth\Authorization\PolicyDecision\RuleAlgorithm;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\PolicyInterface;
 use Whoa\Auth\Contracts\Authorization\PolicyAdministration\TargetInterface;
 use Whoa\Tests\Auth\Authorization\PolicyEnforcement\Data\ContextProperties;
+use Whoa\Tests\Auth\Authorization\PolicyEnforcement\Data\RequestProperties;
 
 /**
  * @package Whoa\Tests\Auth
@@ -33,12 +34,12 @@ use Whoa\Tests\Auth\Authorization\PolicyEnforcement\Data\ContextProperties;
 abstract class Messaging extends General
 {
     /** Operation identity */
-    const OPERATION_SEND = 'send_message';
+    public const OPERATION_SEND = 'send_message';
 
     /**
      * @return PolicyInterface
      */
-    public static function policyCanSendMessage()
+    public static function policyCanSendMessage(): PolicyInterface
     {
         return (new Policy([static::rulePermit()], RuleAlgorithm::denyUnlessPermit()))
             ->setTarget(static::targetSendMessage())
@@ -48,10 +49,10 @@ abstract class Messaging extends General
     /**
      * @return TargetInterface
      */
-    protected static function targetSendMessage()
+    protected static function targetSendMessage(): TargetInterface
     {
         return static::targetMulti([
-            ContextProperties::REQUEST_OPERATION    => static::OPERATION_SEND,
+            RequestProperties::REQUEST_OPERATION => static::OPERATION_SEND,
             ContextProperties::CONTEXT_IS_WORK_TIME => true,
         ]);
     }

@@ -24,6 +24,7 @@ namespace Whoa\Tests\Auth\Authorization\PolicyEnforcement;
 use Exception;
 use Whoa\Auth\Authorization\PolicyAdministration\Policy;
 use Whoa\Auth\Authorization\PolicyAdministration\Rule;
+use Whoa\Auth\Authorization\PolicyDecision\Algorithms\BaseAlgorithm;
 use Whoa\Auth\Authorization\PolicyDecision\Algorithms\BasePolicyOrSetAlgorithm;
 use Whoa\Auth\Authorization\PolicyDecision\Algorithms\Encoder;
 use Whoa\Auth\Authorization\PolicyDecision\PolicyDecisionPoint;
@@ -55,12 +56,12 @@ class PolicyEnforcementTest extends TestCase
     /**
      * @var bool
      */
-    public static $obligationCalled = false;
+    public static bool $obligationCalled = false;
 
     /**
      * @var bool
      */
-    public static $adviceCalled = false;
+    public static bool $adviceCalled = false;
 
     /**
      * @var resource
@@ -75,17 +76,17 @@ class PolicyEnforcementTest extends TestCase
     /**
      * @var int|null
      */
-    private $currentUserId;
+    private ?int $currentUserId;
 
     /**
      * @var string|null
      */
-    private $currentUserRole;
+    private ?string $currentUserRole;
 
     /**
      * @var bool
      */
-    private $isWorkTime;
+    private bool $isWorkTime;
 
     /**
      * Test authorization of operation without any additional parameters (e.g. 'send message').
@@ -93,10 +94,10 @@ class PolicyEnforcementTest extends TestCase
     public function testAuthorizeOperationSuccess()
     {
         // set up environment variables (current user is not signed in and currently is work time)
-        $this->currentUserId   = null;
+        $this->currentUserId = null;
         $this->currentUserRole = null;
-        $this->isWorkTime      = true;
-        $policyEnforcement     = $this->createPolicyEnforcementPoint();
+        $this->isWorkTime = true;
+        $policyEnforcement = $this->createPolicyEnforcementPoint();
 
         // send authorization request
         $authRequest = new Request([
@@ -111,10 +112,10 @@ class PolicyEnforcementTest extends TestCase
     public function testAuthorizeOperationFail()
     {
         // set up environment variables (current user is not signed in and currently is not work time)
-        $this->currentUserId   = null;
+        $this->currentUserId = null;
         $this->currentUserRole = null;
-        $this->isWorkTime      = false;
-        $policyEnforcement     = $this->createPolicyEnforcementPoint();
+        $this->isWorkTime = false;
+        $policyEnforcement = $this->createPolicyEnforcementPoint();
 
         // send authorization request
         $authRequest = new Request([
@@ -130,12 +131,12 @@ class PolicyEnforcementTest extends TestCase
     {
         // set up environment variables (current user is signed as member)
         $this->currentUserRole = 'member';
-        $this->currentUserId   = 123;
-        $policyEnforcement     = $this->createPolicyEnforcementPoint();
+        $this->currentUserId = 123;
+        $policyEnforcement = $this->createPolicyEnforcementPoint();
 
         // send authorization request
         $authRequest = new Request([
-            RequestProperties::REQUEST_OPERATION     => Comments::OPERATION_CREATE,
+            RequestProperties::REQUEST_OPERATION => Data\Policies\General::OPERATION_CREATE,
             RequestProperties::REQUEST_RESOURCE_TYPE => Comments::RESOURCE_TYPE,
         ]);
         $this->assertTrue($policyEnforcement->authorize($authRequest));
@@ -149,14 +150,14 @@ class PolicyEnforcementTest extends TestCase
     public function testAuthorizeOperationOnResourceTypeFail()
     {
         // set up environment variables (current user is not signed in)
-        // check that non signed in user cannot create comments
+        // check that non-signed in user cannot create comments
         $this->currentUserRole = null;
-        $this->currentUserId   = null;
-        $policyEnforcement     = $this->createPolicyEnforcementPoint();
+        $this->currentUserId = null;
+        $policyEnforcement = $this->createPolicyEnforcementPoint();
 
         // send authorization request
         $authRequest = new Request([
-            RequestProperties::REQUEST_OPERATION     => Comments::OPERATION_CREATE,
+            RequestProperties::REQUEST_OPERATION => Data\Policies\General::OPERATION_CREATE,
             RequestProperties::REQUEST_RESOURCE_TYPE => Comments::RESOURCE_TYPE,
         ]);
         $this->assertFalse($policyEnforcement->authorize($authRequest));
@@ -169,21 +170,21 @@ class PolicyEnforcementTest extends TestCase
     {
         // set up environment variables (current user is signed as member)
         $this->currentUserRole = 'member';
-        $this->currentUserId   = 456;
-        $policyEnforcement     = $this->createPolicyEnforcementPoint();
+        $this->currentUserId = 456;
+        $policyEnforcement = $this->createPolicyEnforcementPoint();
 
         // send authorization request
         $authRequest = new Request([
-            RequestProperties::REQUEST_OPERATION         => Comments::OPERATION_UPDATE,
-            RequestProperties::REQUEST_RESOURCE_TYPE     => Comments::RESOURCE_TYPE,
+            RequestProperties::REQUEST_OPERATION => Data\Policies\General::OPERATION_UPDATE,
+            RequestProperties::REQUEST_RESOURCE_TYPE => Comments::RESOURCE_TYPE,
             RequestProperties::REQUEST_RESOURCE_IDENTITY => 123, // <- ID 123 is owned
         ]);
         $this->assertTrue($policyEnforcement->authorize($authRequest));
 
         // send authorization request
         $authRequest = new Request([
-            RequestProperties::REQUEST_OPERATION         => Comments::OPERATION_UPDATE,
-            RequestProperties::REQUEST_RESOURCE_TYPE     => Comments::RESOURCE_TYPE,
+            RequestProperties::REQUEST_OPERATION => Data\Policies\General::OPERATION_UPDATE,
+            RequestProperties::REQUEST_RESOURCE_TYPE => Comments::RESOURCE_TYPE,
             RequestProperties::REQUEST_RESOURCE_IDENTITY => 1234, // <- ID 1234 is not owned
         ]);
         $this->assertFalse($policyEnforcement->authorize($authRequest));
@@ -196,11 +197,11 @@ class PolicyEnforcementTest extends TestCase
     {
         // admin can edit any resource
         $this->currentUserRole = 'admin';
-        $this->currentUserId   = 789;
-        $policyEnforcement     = $this->createPolicyEnforcementPoint();
-        $authRequest           = new Request([
-            RequestProperties::REQUEST_OPERATION         => Comments::OPERATION_UPDATE,
-            RequestProperties::REQUEST_RESOURCE_TYPE     => Comments::RESOURCE_TYPE,
+        $this->currentUserId = 789;
+        $policyEnforcement = $this->createPolicyEnforcementPoint();
+        $authRequest = new Request([
+            RequestProperties::REQUEST_OPERATION => Data\Policies\General::OPERATION_UPDATE,
+            RequestProperties::REQUEST_RESOURCE_TYPE => Comments::RESOURCE_TYPE,
             RequestProperties::REQUEST_RESOURCE_IDENTITY => 1234, // <- ID 1234 is not owned
         ]);
         $this->assertTrue($policyEnforcement->authorize($authRequest));
@@ -212,11 +213,13 @@ class PolicyEnforcementTest extends TestCase
     public function testEvaluatePolicyWithIntermediateAndPermit()
     {
         TestRuleAlgorithm::$result = EvaluationEnum::PERMIT;
-        $policy                    = new Policy([(new Rule())], new TestRuleAlgorithm());
-        $encodedPolicy             = Encoder::encodePolicy($policy);
-        $context                   = new Context(new Request([
-            RequestProperties::REQUEST_OPERATION => Messaging::OPERATION_SEND,
-        ]), $this->getContextDefinitions());
+        $policy = new Policy([(new Rule())], new TestRuleAlgorithm());
+        $encodedPolicy = Encoder::encodePolicy($policy);
+        $context = new Context(
+            new Request([
+                RequestProperties::REQUEST_OPERATION => Messaging::OPERATION_SEND,
+            ]), $this->getContextDefinitions()
+        );
 
         $result = BasePolicyOrSetAlgorithm::evaluatePolicy(
             $context,
@@ -225,9 +228,9 @@ class PolicyEnforcementTest extends TestCase
             $this->logger
         );
         $this->assertEquals([
-            BasePolicyOrSetAlgorithm::EVALUATION_VALUE       => EvaluationEnum::INDETERMINATE_PERMIT,
-            BasePolicyOrSetAlgorithm::EVALUATION_OBLIGATIONS => [],
-            BasePolicyOrSetAlgorithm::EVALUATION_ADVICE      => [],
+            BaseAlgorithm::EVALUATION_VALUE => EvaluationEnum::INDETERMINATE_PERMIT,
+            BaseAlgorithm::EVALUATION_OBLIGATIONS => [],
+            BaseAlgorithm::EVALUATION_ADVICE => [],
         ], $result);
     }
 
@@ -237,11 +240,13 @@ class PolicyEnforcementTest extends TestCase
     public function testEvaluatePolicyWithIntermediateAndDeny()
     {
         TestRuleAlgorithm::$result = EvaluationEnum::DENY;
-        $policy                    = new Policy([(new Rule())], new TestRuleAlgorithm());
-        $encodedPolicy             = Encoder::encodePolicy($policy);
-        $context                   = new Context(new Request([
-            RequestProperties::REQUEST_OPERATION => Messaging::OPERATION_SEND,
-        ]), $this->getContextDefinitions());
+        $policy = new Policy([(new Rule())], new TestRuleAlgorithm());
+        $encodedPolicy = Encoder::encodePolicy($policy);
+        $context = new Context(
+            new Request([
+                RequestProperties::REQUEST_OPERATION => Messaging::OPERATION_SEND,
+            ]), $this->getContextDefinitions()
+        );
 
         $result = BasePolicyOrSetAlgorithm::evaluatePolicy(
             $context,
@@ -250,9 +255,9 @@ class PolicyEnforcementTest extends TestCase
             $this->logger
         );
         $this->assertEquals([
-            BasePolicyOrSetAlgorithm::EVALUATION_VALUE       => EvaluationEnum::INDETERMINATE_DENY,
-            BasePolicyOrSetAlgorithm::EVALUATION_OBLIGATIONS => [],
-            BasePolicyOrSetAlgorithm::EVALUATION_ADVICE      => [],
+            BaseAlgorithm::EVALUATION_VALUE => EvaluationEnum::INDETERMINATE_DENY,
+            BaseAlgorithm::EVALUATION_OBLIGATIONS => [],
+            BaseAlgorithm::EVALUATION_ADVICE => [],
         ], $result);
     }
 
@@ -262,11 +267,13 @@ class PolicyEnforcementTest extends TestCase
     public function testEvaluatePolicyWithIntermediateAndIntermediate()
     {
         TestRuleAlgorithm::$result = EvaluationEnum::INDETERMINATE;
-        $policy                    = new Policy([(new Rule())], new TestRuleAlgorithm());
-        $encodedPolicy             = Encoder::encodePolicy($policy);
-        $context                   = new Context(new Request([
-            RequestProperties::REQUEST_OPERATION => Messaging::OPERATION_SEND,
-        ]), $this->getContextDefinitions());
+        $policy = new Policy([(new Rule())], new TestRuleAlgorithm());
+        $encodedPolicy = Encoder::encodePolicy($policy);
+        $context = new Context(
+            new Request([
+                RequestProperties::REQUEST_OPERATION => Messaging::OPERATION_SEND,
+            ]), $this->getContextDefinitions()
+        );
 
         $result = BasePolicyOrSetAlgorithm::evaluatePolicy(
             $context,
@@ -275,9 +282,9 @@ class PolicyEnforcementTest extends TestCase
             $this->logger
         );
         $this->assertEquals([
-            BasePolicyOrSetAlgorithm::EVALUATION_VALUE       => EvaluationEnum::INDETERMINATE_DENY_OR_PERMIT,
-            BasePolicyOrSetAlgorithm::EVALUATION_OBLIGATIONS => [],
-            BasePolicyOrSetAlgorithm::EVALUATION_ADVICE      => [],
+            BaseAlgorithm::EVALUATION_VALUE => EvaluationEnum::INDETERMINATE_DENY_OR_PERMIT,
+            BaseAlgorithm::EVALUATION_OBLIGATIONS => [],
+            BaseAlgorithm::EVALUATION_ADVICE => [],
         ], $result);
     }
 
@@ -287,11 +294,13 @@ class PolicyEnforcementTest extends TestCase
     public function testEvaluatePolicyWithIntermediateAndIntermediateDenyOrPermit()
     {
         TestRuleAlgorithm::$result = EvaluationEnum::INDETERMINATE_DENY_OR_PERMIT;
-        $policy                    = new Policy([(new Rule())], new TestRuleAlgorithm());
-        $encodedPolicy             = Encoder::encodePolicy($policy);
-        $context                   = new Context(new Request([
-            RequestProperties::REQUEST_OPERATION => Messaging::OPERATION_SEND,
-        ]), $this->getContextDefinitions());
+        $policy = new Policy([(new Rule())], new TestRuleAlgorithm());
+        $encodedPolicy = Encoder::encodePolicy($policy);
+        $context = new Context(
+            new Request([
+                RequestProperties::REQUEST_OPERATION => Messaging::OPERATION_SEND,
+            ]), $this->getContextDefinitions()
+        );
 
         $result = BasePolicyOrSetAlgorithm::evaluatePolicy(
             $context,
@@ -300,9 +309,9 @@ class PolicyEnforcementTest extends TestCase
             $this->logger
         );
         $this->assertEquals([
-            BasePolicyOrSetAlgorithm::EVALUATION_VALUE       => EvaluationEnum::INDETERMINATE_DENY_OR_PERMIT,
-            BasePolicyOrSetAlgorithm::EVALUATION_OBLIGATIONS => [],
-            BasePolicyOrSetAlgorithm::EVALUATION_ADVICE      => [],
+            BaseAlgorithm::EVALUATION_VALUE => EvaluationEnum::INDETERMINATE_DENY_OR_PERMIT,
+            BaseAlgorithm::EVALUATION_OBLIGATIONS => [],
+            BaseAlgorithm::EVALUATION_ADVICE => [],
         ], $result);
     }
 
@@ -312,11 +321,13 @@ class PolicyEnforcementTest extends TestCase
     public function testEvaluatePolicyWithIntermediateAndIntermediatePermit()
     {
         TestRuleAlgorithm::$result = EvaluationEnum::INDETERMINATE_PERMIT;
-        $policy                    = new Policy([(new Rule())], new TestRuleAlgorithm());
-        $encodedPolicy             = Encoder::encodePolicy($policy);
-        $context                   = new Context(new Request([
-            RequestProperties::REQUEST_OPERATION => Messaging::OPERATION_SEND,
-        ]), $this->getContextDefinitions());
+        $policy = new Policy([(new Rule())], new TestRuleAlgorithm());
+        $encodedPolicy = Encoder::encodePolicy($policy);
+        $context = new Context(
+            new Request([
+                RequestProperties::REQUEST_OPERATION => Messaging::OPERATION_SEND,
+            ]), $this->getContextDefinitions()
+        );
 
         $result = BasePolicyOrSetAlgorithm::evaluatePolicy(
             $context,
@@ -325,9 +336,9 @@ class PolicyEnforcementTest extends TestCase
             $this->logger
         );
         $this->assertEquals([
-            BasePolicyOrSetAlgorithm::EVALUATION_VALUE       => EvaluationEnum::INDETERMINATE_PERMIT,
-            BasePolicyOrSetAlgorithm::EVALUATION_OBLIGATIONS => [],
-            BasePolicyOrSetAlgorithm::EVALUATION_ADVICE      => [],
+            BaseAlgorithm::EVALUATION_VALUE => EvaluationEnum::INDETERMINATE_PERMIT,
+            BaseAlgorithm::EVALUATION_OBLIGATIONS => [],
+            BaseAlgorithm::EVALUATION_ADVICE => [],
         ], $result);
     }
 
@@ -337,11 +348,13 @@ class PolicyEnforcementTest extends TestCase
     public function testEvaluatePolicyWithIntermediateAndIntermediateDeny()
     {
         TestRuleAlgorithm::$result = EvaluationEnum::INDETERMINATE_DENY;
-        $policy                    = new Policy([(new Rule())], new TestRuleAlgorithm());
-        $encodedPolicy             = Encoder::encodePolicy($policy);
-        $context                   = new Context(new Request([
-            RequestProperties::REQUEST_OPERATION => Messaging::OPERATION_SEND,
-        ]), $this->getContextDefinitions());
+        $policy = new Policy([(new Rule())], new TestRuleAlgorithm());
+        $encodedPolicy = Encoder::encodePolicy($policy);
+        $context = new Context(
+            new Request([
+                RequestProperties::REQUEST_OPERATION => Messaging::OPERATION_SEND,
+            ]), $this->getContextDefinitions()
+        );
 
         $result = BasePolicyOrSetAlgorithm::evaluatePolicy(
             $context,
@@ -350,9 +363,9 @@ class PolicyEnforcementTest extends TestCase
             $this->logger
         );
         $this->assertEquals([
-            BasePolicyOrSetAlgorithm::EVALUATION_VALUE       => EvaluationEnum::INDETERMINATE_DENY,
-            BasePolicyOrSetAlgorithm::EVALUATION_OBLIGATIONS => [],
-            BasePolicyOrSetAlgorithm::EVALUATION_ADVICE      => [],
+            BaseAlgorithm::EVALUATION_VALUE => EvaluationEnum::INDETERMINATE_DENY,
+            BaseAlgorithm::EVALUATION_OBLIGATIONS => [],
+            BaseAlgorithm::EVALUATION_ADVICE => [],
         ], $result);
     }
 
@@ -361,11 +374,13 @@ class PolicyEnforcementTest extends TestCase
      */
     public function testEvaluatePolicySetWithIntermediate()
     {
-        $set           = Application::getApplicationPolicy();
+        $set = Application::getApplicationPolicy();
         $encodedPolicy = Encoder::encodePolicySet($set);
-        $context       = new Context(new Request([
-            RequestProperties::REQUEST_OPERATION => Messaging::OPERATION_SEND,
-        ]), $this->getContextDefinitions());
+        $context = new Context(
+            new Request([
+                RequestProperties::REQUEST_OPERATION => Messaging::OPERATION_SEND,
+            ]), $this->getContextDefinitions()
+        );
 
         $logger = null;
 
@@ -376,9 +391,9 @@ class PolicyEnforcementTest extends TestCase
             $logger
         );
         $this->assertEquals([
-            BasePolicyOrSetAlgorithm::EVALUATION_VALUE       => EvaluationEnum::NOT_APPLICABLE,
-            BasePolicyOrSetAlgorithm::EVALUATION_OBLIGATIONS => [],
-            BasePolicyOrSetAlgorithm::EVALUATION_ADVICE      => [],
+            BaseAlgorithm::EVALUATION_VALUE => EvaluationEnum::NOT_APPLICABLE,
+            BaseAlgorithm::EVALUATION_OBLIGATIONS => [],
+            BaseAlgorithm::EVALUATION_ADVICE => [],
         ], $result);
     }
 
@@ -387,11 +402,13 @@ class PolicyEnforcementTest extends TestCase
      */
     public function testEvaluatePolicySetWithNotMatch()
     {
-        $set           = Application::getApplicationPolicy();
+        $set = Application::getApplicationPolicy();
         $encodedPolicy = Encoder::encodePolicySet($set);
-        $context       = new Context(new Request([
-            RequestProperties::REQUEST_OPERATION => Messaging::OPERATION_SEND,
-        ]), $this->getContextDefinitions());
+        $context = new Context(
+            new Request([
+                RequestProperties::REQUEST_OPERATION => Messaging::OPERATION_SEND,
+            ]), $this->getContextDefinitions()
+        );
 
         $logger = null;
 
@@ -402,15 +419,14 @@ class PolicyEnforcementTest extends TestCase
             $logger
         );
         $this->assertEquals([
-            BasePolicyOrSetAlgorithm::EVALUATION_VALUE       => EvaluationEnum::NOT_APPLICABLE,
-            BasePolicyOrSetAlgorithm::EVALUATION_OBLIGATIONS => [],
-            BasePolicyOrSetAlgorithm::EVALUATION_ADVICE      => [],
+            BaseAlgorithm::EVALUATION_VALUE => EvaluationEnum::NOT_APPLICABLE,
+            BaseAlgorithm::EVALUATION_OBLIGATIONS => [],
+            BaseAlgorithm::EVALUATION_ADVICE => [],
         ], $result);
     }
 
     /**
      * @param ContextInterface $context
-     *
      * @return void
      */
     public static function markObligationAsCalled(ContextInterface $context)
@@ -423,7 +439,6 @@ class PolicyEnforcementTest extends TestCase
 
     /**
      * @param ContextInterface $context
-     *
      * @return void
      */
     public static function markAdviceAsCalled(ContextInterface $context)
@@ -436,7 +451,6 @@ class PolicyEnforcementTest extends TestCase
 
     /**
      * @inheritdoc
-     *
      * @throws Exception
      */
     protected function setUp(): void
@@ -444,14 +458,14 @@ class PolicyEnforcementTest extends TestCase
         parent::setUp();
 
         $this->logStream = fopen('php://memory', 'rw');
-        $this->logger    = new Logger('auth', [new StreamHandler($this->getLogStream())]);
+        $this->logger = new Logger('auth', [new StreamHandler($this->getLogStream())]);
 
-        $this->currentUserId   = null;
+        $this->currentUserId = null;
         $this->currentUserRole = null;
-        $this->isWorkTime      = false;
+        $this->isWorkTime = false;
 
         static::$obligationCalled = false;
-        static::$adviceCalled     = false;
+        static::$adviceCalled = false;
     }
 
     /**
@@ -475,7 +489,7 @@ class PolicyEnforcementTest extends TestCase
     /**
      * @return LoggerInterface
      */
-    protected function getLogger()
+    protected function getLogger(): LoggerInterface
     {
         return $this->logger;
     }
@@ -483,12 +497,10 @@ class PolicyEnforcementTest extends TestCase
     /**
      * @return string
      */
-    protected function getLogs()
+    protected function getLogs(): string
     {
         rewind($this->getLogStream());
-        $logs = stream_get_contents($this->getLogStream());
-
-        return $logs;
+        return stream_get_contents($this->getLogStream());
     }
 
     /**
@@ -518,26 +530,24 @@ class PolicyEnforcementTest extends TestCase
      */
     private function createPolicyInformationPoint()
     {
-        // Typically values are taken from application container, system environment and
+        // Typically, values are taken from application container, system environment and
         // external systems but not from constructor parameters. However it's fine for testing purposes.
         // Both scalar values and methods/closures are supported.
-        $pip = new PolicyInformationPoint($this->getContextDefinitions());
-
-        return $pip;
+        return new PolicyInformationPoint($this->getContextDefinitions());
     }
 
     /**
      * @return array
      */
-    private function getContextDefinitions()
+    private function getContextDefinitions(): array
     {
         return [
-            LoggerInterface::class                       => $this->getLogger(),
-            ContextProperties::CONTEXT_CURRENT_USER_ID   => $this->currentUserId,
+            LoggerInterface::class => $this->getLogger(),
+            ContextProperties::CONTEXT_CURRENT_USER_ID => $this->currentUserId,
             ContextProperties::CONTEXT_CURRENT_USER_ROLE => $this->currentUserRole,
             ContextProperties::CONTEXT_USER_IS_SIGNED_IN => $this->currentUserId !== null &&
                 $this->currentUserRole !== null,
-            ContextProperties::CONTEXT_IS_WORK_TIME      => function () {
+            ContextProperties::CONTEXT_IS_WORK_TIME => function () {
                 return $this->isWorkTime;
             },
         ];
